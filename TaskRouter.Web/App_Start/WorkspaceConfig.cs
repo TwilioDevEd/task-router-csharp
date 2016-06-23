@@ -26,7 +26,7 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", "https://sb.ngrok.io/events");
+            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", "https://sb.ngrok.io/call/events");
             var workspaceSid = workspace.Sid;
 
             CreateWorkers(workspaceSid);
@@ -51,21 +51,29 @@ namespace TaskRouter.Web
             {
                 FriendlyName = "Voice",
                 Expression = "selected_product==\"ProgrammableVoice\"",
-                Targets = new List<Target>() { new Target { Queue = voiceQueue.Sid } }
+                Targets = new List<Target>() {
+                    new Target { Queue = voiceQueue.Sid, Priority = "5", Timeout = "30" },
+                    new Target { Queue = allQueue.Sid, Expression = "1==1", Priority = "1", Timeout = "30" }
+                }
             };
 
             var smsFilter = new Filter()
             {
                 FriendlyName = "SMS",
                 Expression = "selected_product==\"ProgrammableSMS\"",
-                Targets = new List<Target>() { new Target { Queue = smsQueue.Sid } }
+                Targets = new List<Target>() {
+                    new Target { Queue = smsQueue.Sid, Priority = "5", Timeout = "30" },
+                    new Target { Queue = allQueue.Sid, Expression = "1==1", Priority = "1", Timeout = "30" }
+                }
             };
 
             var workflowConfiguration = new WorkflowConfiguration();
 
             workflowConfiguration.Filters.Add(voiceFilter);
             workflowConfiguration.Filters.Add(smsFilter);
-            workflowConfiguration.DefaultFilter = new Target() { Queue = allQueue.Sid };
+            workflowConfiguration.DefaultFilter = new Target() {
+                Queue = allQueue.Sid, Expression = "1==1", Priority = "1", Timeout = "30"
+            };
 
             // Convert to JSON
             var workflowJSON = "{\"task_routing\":" + workflowConfiguration.ToString() + "}";
@@ -75,9 +83,9 @@ namespace TaskRouter.Web
                 workspaceSid,
                 "Tech Support",
                 workflowJSON,
-                "https://sb.ngrok.io/assignment",
-                "https://sb.ngrok.io/assignment",
-                60);
+                "https://sb.ngrok.io/call/assignment",
+                "https://sb.ngrok.io/call/assignment",
+                15);
 
             Singleton.Instance.WorkflowSid = workflow.Sid;
 
@@ -92,7 +100,10 @@ namespace TaskRouter.Web
                 _client.DeleteWorkspace(workspace.Sid);
             }
 
-            return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
+            workspace = _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
+
+            var idle = GetActivityByFriendlyName(workspace.Sid, "Idle");
+            return _client.UpdateWorkspace(workspace.Sid, friendlyName, eventCallbackUrl, idle.Sid, null);
         }
 
         private void CreateWorkers(string workspaceSid)
@@ -102,7 +113,7 @@ namespace TaskRouter.Web
             _client.AddWorker(workspaceSid, "Bob", null, attributesForBob);
 
             var attributesForAlice =
-                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"+593987908027\"}";
+                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"+593999031619\"}";
             _client.AddWorker(workspaceSid, "Alice", null, attributesForAlice);
         }
 

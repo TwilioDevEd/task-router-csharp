@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using TaskRouter.Web.Controllers;
 using TestStack.FluentMVCTesting;
 
 namespace TaskRouter.Web.Tests.Controllers
 {
-    [TestClass]
     public class HomeControllerTest
     {
-        [TestMethod]
+        [Test]
         public void Index()
         {
             var controller = new HomeController();

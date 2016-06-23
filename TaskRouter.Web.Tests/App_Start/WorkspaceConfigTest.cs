@@ -29,9 +29,15 @@ namespace TaskRouter.Web.Tests.App_Start
             activityResult.Activities.Add(new Activity { Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", FriendlyName = "Idle" });
             _mockClient.Setup(c => c.ListActivities(It.IsAny<string>())).Returns(activityResult);
 
+
+            var workspace = new Workspace { Sid = "WSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" };
             _mockClient
                 .Setup(c => c.AddWorkspace(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new Workspace { Sid = "WSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
+                .Returns(workspace);
+
+            _mockClient
+                .Setup(c => c.UpdateWorkspace(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null))
+                .Returns(workspace);
 
             _mockClient
                 .Setup(c => c.AddTaskQueue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null))
