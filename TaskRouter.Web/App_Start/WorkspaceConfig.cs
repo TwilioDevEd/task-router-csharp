@@ -22,43 +22,25 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = GetWorkspaceByFriendlyName("Twilio Workspace");
-            if (workspace != null)
-            {
-                _client.DeleteWorkspace(workspace.Sid);
-            }
-
-            workspace = _client.AddWorkspace("Twilio Workspace", "https://sb.ngrok.io/events", null);
+            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", "https://sb.ngrok.io/events");
             var workspaceSid = workspace.Sid;
 
-            var attributesForBob = "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"+593992670240\"}";
-            var bob = _client.AddWorker(workspaceSid, "Bob", null, attributesForBob);
-
-            var attributesForAlice = "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"+593987908027\"}";
-            var alice = _client.AddWorker(workspaceSid, "Alice", null, attributesForAlice);
+            CreateWorkers(workspaceSid);
 
             var reservationActivity = GetActivityByFriendlyName(workspaceSid, "Reserved");
             var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Busy");
 
-            var voiceQueue = _client.AddTaskQueue(
-                workspaceSid,
-                "Voice",
-                assignmentActivity.Sid,
-                reservationActivity.Sid,
-                "products HAS \"ProgrammableVoice\"", null);
+            var voiceQueue = CreateTaskQueue(
+                workspaceSid, "Voice",
+                reservationActivity.Sid, assignmentActivity.Sid, "products HAS 'ProgrammableVoice'");
 
-            var smsQueue = _client.AddTaskQueue(workspaceSid,
-                "SMS",
-                assignmentActivity.Sid,
-                reservationActivity.Sid,
-                "products HAS \"ProgrammableSMS\"", null);
+            var smsQueue = CreateTaskQueue(
+                workspaceSid, "SMS",
+                reservationActivity.Sid, assignmentActivity.Sid, "products HAS 'ProgrammableSMS'");
 
-            var allQueue = _client.AddTaskQueue(
-                workspaceSid,
-                "All",
-                assignmentActivity.Sid,
-                reservationActivity.Sid,
-                "1==1", null);
+            var allQueue = CreateTaskQueue(
+                workspaceSid, "All",
+                reservationActivity.Sid, assignmentActivity.Sid, "1 == 1");
 
             // Workflow
             var voiceFilter = new Filter()
@@ -81,11 +63,10 @@ namespace TaskRouter.Web
             workflowConfiguration.Filters.Add(smsFilter);
             workflowConfiguration.DefaultFilter = new Target() { Queue = allQueue.Sid };
 
-            // Convert to json
-            var workflowJSON = workflowConfiguration.ToString();
-            workflowJSON = "{\"task_routing\":" + workflowJSON + "}";
+            // Convert to JSON
+            var workflowJSON = "{\"task_routing\":" + workflowConfiguration.ToString() + "}";
 
-            // Call rest api
+            // Call REST API
             Workflow workflow = _client.AddWorkflow(
                 workspaceSid,
                 "Tech Support",
@@ -93,8 +74,44 @@ namespace TaskRouter.Web
                 "https://sb.ngrok.io/assignment",
                 "https://sb.ngrok.io/assignment",
                 60);
+        }
 
-            Console.WriteLine(workflow.FriendlyName);
+        private Workspace DeleteAndCreateWorkspace(string friendlyName, string eventCallbackUrl) {
+            var workspace = GetWorkspaceByFriendlyName(friendlyName);
+            if (workspace != null)
+            {
+                _client.DeleteWorkspace(workspace.Sid);
+            }
+
+            return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
+        }
+
+        private void CreateWorkers(string workspaceSid)
+        {
+            var attributesForBob =
+                "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"+593992670240\"}";
+            _client.AddWorker(workspaceSid, "Bob", null, attributesForBob);
+
+            var attributesForAlice =
+                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"+593987908027\"}";
+            _client.AddWorker(workspaceSid, "Alice", null, attributesForAlice);
+        }
+
+        private TaskQueue CreateTaskQueue(
+            string workspaceSid, string friendlyName,
+            string assignmentActivitySid, string reservationActivitySid, string targetWorkers)
+        {
+            var queue = _client.AddTaskQueue(
+                workspaceSid, friendlyName, assignmentActivitySid, reservationActivitySid, string.Empty, null);
+            _client.UpdateTaskQueue(
+                workspaceSid,
+                queue.Sid,
+                friendlyName,
+                assignmentActivitySid,
+                reservationActivitySid,
+                targetWorkers, 1);
+
+            return queue;
         }
 
         private Activity GetActivityByFriendlyName(string workspaceSid, string friendlyName)
