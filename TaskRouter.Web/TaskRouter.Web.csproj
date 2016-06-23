@@ -145,8 +145,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WorkspaceConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Domain\Config.cs" />
-    <Compile Include="Domain\Singleton.cs" />
+    <Compile Include="Infraestructure\Config.cs" />
+    <Compile Include="Infraestructure\Singleton.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

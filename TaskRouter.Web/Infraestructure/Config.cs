@@ -1,6 +1,6 @@
 ﻿using System.Web.Configuration;
 
-namespace TaskRouter.Web.Domain
+namespace TaskRouter.Web.Infraestructure
 {
     public class Config
     {

@@ -1,4 +1,4 @@
-﻿namespace TaskRouter.Web.Domain
+﻿namespace TaskRouter.Web.Infraestructure
 {
     public class Singleton
     {
