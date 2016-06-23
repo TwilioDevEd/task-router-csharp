@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using TaskRouter.Web.Domain;
 using Twilio.TaskRouter;
@@ -18,6 +17,11 @@ namespace TaskRouter.Web
         public WorkspaceConfig()
         {
             _client = new TaskRouterClient(Config.AccountSID, Config.AuthToken);
+        }
+
+        public WorkspaceConfig(TaskRouterClient client)
+        {
+            _client = client;
         }
 
         public void Register()
@@ -74,6 +78,11 @@ namespace TaskRouter.Web
                 "https://sb.ngrok.io/assignment",
                 "https://sb.ngrok.io/assignment",
                 60);
+
+            Singleton.Instance.WorkflowSid = workflow.Sid;
+
+            var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
+            Singleton.Instance.PostWorkActivitySid = idle.Sid;
         }
 
         private Workspace DeleteAndCreateWorkspace(string friendlyName, string eventCallbackUrl) {
