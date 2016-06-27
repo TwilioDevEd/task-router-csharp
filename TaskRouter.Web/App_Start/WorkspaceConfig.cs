@@ -8,6 +8,7 @@ namespace TaskRouter.Web
     public class WorkspaceConfig
     {
         private readonly TaskRouterClient _client;
+        private readonly string hostUrl = Config.HostUrl;
 
         public static void RegisterWorkspace()
         {
@@ -26,7 +27,7 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", "https://sb.ngrok.io/call/events");
+            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", string.Format("{0}/call/events", hostUrl));
             var workspaceSid = workspace.Sid;
 
             CreateWorkers(workspaceSid);
@@ -83,8 +84,8 @@ namespace TaskRouter.Web
                 workspaceSid,
                 "Tech Support",
                 workflowJSON,
-                "https://sb.ngrok.io/call/assignment",
-                "https://sb.ngrok.io/call/assignment",
+                string.Format("{0}/call/assignment", hostUrl),
+                string.Format("{0}/call/assignment", hostUrl),
                 15);
 
             Singleton.Instance.WorkflowSid = workflow.Sid;
@@ -100,20 +101,17 @@ namespace TaskRouter.Web
                 _client.DeleteWorkspace(workspace.Sid);
             }
 
-            workspace = _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
-
-            var idle = GetActivityByFriendlyName(workspace.Sid, "Idle");
-            return _client.UpdateWorkspace(workspace.Sid, friendlyName, eventCallbackUrl, idle.Sid, null);
+            return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
         }
 
         private void CreateWorkers(string workspaceSid)
         {
             var attributesForBob =
-                "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"+593992670240\"}";
+                "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"" + Config.AgentForProgrammableSMS + "\"}";
             _client.AddWorker(workspaceSid, "Bob", null, attributesForBob);
 
             var attributesForAlice =
-                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"+593999031619\"}";
+                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"" + Config.AgentForProgrammableVoice + "\"}";
             _client.AddWorker(workspaceSid, "Alice", null, attributesForAlice);
         }
 

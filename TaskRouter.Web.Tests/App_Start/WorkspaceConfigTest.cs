@@ -36,10 +36,6 @@ namespace TaskRouter.Web.Tests.App_Start
                 .Returns(workspace);
 
             _mockClient
-                .Setup(c => c.UpdateWorkspace(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null))
-                .Returns(workspace);
-
-            _mockClient
                 .Setup(c => c.AddTaskQueue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), null))
                 .Returns(new TaskQueue { Sid = "WQXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" });
 
