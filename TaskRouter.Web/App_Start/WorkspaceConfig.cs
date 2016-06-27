@@ -37,15 +37,15 @@ namespace TaskRouter.Web
 
             var voiceQueue = CreateTaskQueue(
                 workspaceSid, "Voice",
-                reservationActivity.Sid, assignmentActivity.Sid, "products HAS 'ProgrammableVoice'");
+                assignmentActivity.Sid, reservationActivity.Sid, "products HAS 'ProgrammableVoice'");
 
             var smsQueue = CreateTaskQueue(
                 workspaceSid, "SMS",
-                reservationActivity.Sid, assignmentActivity.Sid, "products HAS 'ProgrammableSMS'");
+                assignmentActivity.Sid, reservationActivity.Sid, "products HAS 'ProgrammableSMS'");
 
             var allQueue = CreateTaskQueue(
                 workspaceSid, "All",
-                reservationActivity.Sid, assignmentActivity.Sid, "1 == 1");
+                assignmentActivity.Sid, reservationActivity.Sid, "1 == 1");
 
             // Workflow
             var voiceFilter = new Filter()
@@ -87,7 +87,6 @@ namespace TaskRouter.Web
                 string.Format("{0}/call/assignment", hostUrl),
                 string.Format("{0}/call/assignment", hostUrl),
                 15);
-
             Singleton.Instance.WorkflowSid = workflow.Sid;
 
             var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
@@ -106,13 +105,14 @@ namespace TaskRouter.Web
 
         private void CreateWorkers(string workspaceSid)
         {
+            var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
             var attributesForBob =
                 "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"" + Config.AgentForProgrammableSMS + "\"}";
-            _client.AddWorker(workspaceSid, "Bob", null, attributesForBob);
+            _client.AddWorker(workspaceSid, "Bob", idle.Sid, attributesForBob);
 
             var attributesForAlice =
                 "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"" + Config.AgentForProgrammableVoice + "\"}";
-            _client.AddWorker(workspaceSid, "Alice", null, attributesForAlice);
+            _client.AddWorker(workspaceSid, "Alice", idle.Sid, attributesForAlice);
         }
 
         private TaskQueue CreateTaskQueue(

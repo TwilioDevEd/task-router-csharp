@@ -1,5 +1,34 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿@model IList<TaskRouter.Web.Models.MissedCall>
 
-@ViewBag.WorkflowSid
+<div class="container full-height-container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+        <strong>Missed calls</strong> <span class="text-muted">(Product/Number)</span></div>
+        <!-- Table -->
+        <table class="table">
+            <tbody>
+                @foreach (var missedCall in Model)
+                {
+                    <tr>
+                        <td class="col-md-4">
+                            @if (missedCall.Product.Equals("ProgrammableVoice"))
+                            {
+                                <span>Programmable Voice</span>
+                            }
+                            else
+                            {
+                                <span>Programmable SMS</span>
+                            }
+                        </td>
+                        <td class="col-md-8">
+                            <a href="tel:@missedCall.PhoneNumber">
+                                <i class="fa fa-phone"></i>
+                                @missedCall.PhoneNumber
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

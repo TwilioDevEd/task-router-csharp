@@ -1,12 +1,28 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
+using TaskRouter.Web.Models;
+using TaskRouter.Web.Services;
 
 namespace TaskRouter.Web.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        private readonly IMissedCallsService _service;
+
+        public HomeController()
         {
-            return View();
+            _service = new MissedCallsService(new TaskRouterDbContext());
+        }
+
+        public HomeController(IMissedCallsService service)
+        {
+            _service = service;
+        }
+
+        public async Task<ActionResult> Index()
+        {
+            var missedCalls = await _service.FindAllAsync();
+            return View(missedCalls);
         }
     }
 }
