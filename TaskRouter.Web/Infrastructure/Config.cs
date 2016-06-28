@@ -19,6 +19,11 @@ namespace TaskRouter.Web.Infrastructure
             get { return WebConfigurationManager.AppSettings["HostUrl"]; }
         }
 
+        public static string VoiceMail
+        {
+            get { return WebConfigurationManager.AppSettings["VoiceMail"]; }
+        }
+
         public static string AgentForProgrammableVoice
         {
             get { return WebConfigurationManager.AppSettings["AgentForProgrammableVoice"]; }

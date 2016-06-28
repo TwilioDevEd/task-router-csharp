@@ -60,7 +60,7 @@ namespace TaskRouter.Web.Controllers
         private void VoiceMail(string callSid)
         {
             var msg = "Sorry, All agents are busy. Please leave a message. We will call you as soon as possible";
-            var routeUrl = "http://twimlets.com/voicemail?Email=" + "agustin.camino@gmail.com" + "&Message=" + msg;
+            var routeUrl = "http://twimlets.com/voicemail?Email=" + Config.VoiceMail + "&Message=" + Url.Encode(msg);
             var client = new Twilio.TwilioRestClient(Config.AccountSID, Config.AuthToken);
             client.RedirectCall(callSid, new Twilio.CallOptions { Url = routeUrl });
         }
