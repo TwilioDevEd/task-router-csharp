@@ -14,6 +14,11 @@ namespace TaskRouter.Web.Infrastructure
             get { return WebConfigurationManager.AppSettings["AuthToken"]; }
         }
 
+        public static string TwilioNumber
+        {
+            get { return WebConfigurationManager.AppSettings["TwilioNumber"]; }
+        }
+
         public static string HostUrl
         {
             get { return WebConfigurationManager.AppSettings["HostUrl"]; }

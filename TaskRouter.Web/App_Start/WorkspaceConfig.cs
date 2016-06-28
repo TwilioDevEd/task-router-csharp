@@ -29,6 +29,7 @@ namespace TaskRouter.Web
         {
             var workspace = DeleteAndCreateWorkspace("Twilio Workspace", string.Format("{0}/callback/events", hostUrl));
             var workspaceSid = workspace.Sid;
+            Singleton.Instance.WorkspaceSid = workspaceSid;
 
             CreateWorkers(workspaceSid);
 
@@ -90,7 +91,10 @@ namespace TaskRouter.Web
             Singleton.Instance.WorkflowSid = workflow.Sid;
 
             var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
+            var offline = GetActivityByFriendlyName(workspaceSid, "Offline");
             Singleton.Instance.PostWorkActivitySid = idle.Sid;
+            Singleton.Instance.IdleActivitySid = idle.Sid;
+            Singleton.Instance.OfflineActivitySid = offline.Sid;
         }
 
         private Workspace DeleteAndCreateWorkspace(string friendlyName, string eventCallbackUrl) {

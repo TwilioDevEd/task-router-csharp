@@ -27,6 +27,7 @@ namespace TaskRouter.Web.Tests.App_Start
             activityResult.Activities.Add(new Activity { Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", FriendlyName = "Reserved" });
             activityResult.Activities.Add(new Activity { Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", FriendlyName = "Busy" });
             activityResult.Activities.Add(new Activity { Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", FriendlyName = "Idle" });
+            activityResult.Activities.Add(new Activity { Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", FriendlyName = "Offline" });
             _mockClient.Setup(c => c.ListActivities(It.IsAny<string>())).Returns(activityResult);
 
 

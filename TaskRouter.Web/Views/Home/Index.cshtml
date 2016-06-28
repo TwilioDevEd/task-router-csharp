@@ -10,7 +10,12 @@
                 @foreach (var missedCall in Model)
                 {
                     <tr>
-                        <td class="col-md-4">
+                        <td class="col-md-3">
+                            <span class="text-muted">
+                                @missedCall.CreatedAt.ToLocalTime()
+                            </span>
+                        </td>
+                        <td class="col-md-2">
                             @if (missedCall.Product.Equals("ProgrammableVoice"))
                             {
                                 <span>Programmable Voice</span>
@@ -20,7 +25,7 @@
                                 <span>Programmable SMS</span>
                             }
                         </td>
-                        <td class="col-md-8">
+                        <td class="col-md-7">
                             <a href="tel:@missedCall.PhoneNumber">
                                 <i class="fa fa-phone"></i>
                                 @missedCall.PhoneNumber
