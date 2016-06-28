@@ -1,7 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
 using System.Collections.Generic;
-using TaskRouter.Web.Infraestructure;
+using TaskRouter.Web.Infrastructure;
 using Twilio.TaskRouter;
 
 namespace TaskRouter.Web.Tests.App_Start

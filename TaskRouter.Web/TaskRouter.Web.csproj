@@ -168,10 +168,11 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WorkspaceConfig.cs" />
+    <Compile Include="Controllers\CallbackController.cs" />
     <Compile Include="Controllers\CallController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Infraestructure\Config.cs" />
-    <Compile Include="Infraestructure\Singleton.cs" />
+    <Compile Include="Infrastructure\Config.cs" />
+    <Compile Include="Infrastructure\Singleton.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

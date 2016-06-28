@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TaskRouter.Web.Infraestructure;
+using TaskRouter.Web.Infrastructure;
 using Twilio.TaskRouter;
 
 namespace TaskRouter.Web
@@ -27,7 +27,7 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", string.Format("{0}/call/events", hostUrl));
+            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", string.Format("{0}/callback/events", hostUrl));
             var workspaceSid = workspace.Sid;
 
             CreateWorkers(workspaceSid);
@@ -84,8 +84,8 @@ namespace TaskRouter.Web
                 workspaceSid,
                 "Tech Support",
                 workflowJSON,
-                string.Format("{0}/call/assignment", hostUrl),
-                string.Format("{0}/call/assignment", hostUrl),
+                string.Format("{0}/callback/assignment", hostUrl),
+                string.Format("{0}/callback/assignment", hostUrl),
                 15);
             Singleton.Instance.WorkflowSid = workflow.Sid;
 

@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WorkspaceConfigTest.cs" />
+    <Compile Include="Controllers\CallbackControllerTest.cs" />
     <Compile Include="Controllers\CallControllerTest.cs" />
     <Compile Include="Extensions\ControllerResultTestExtensions.cs" />
     <Compile Include="Extensions\TwiMLResultExtensions.cs" />

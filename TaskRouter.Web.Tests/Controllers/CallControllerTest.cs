@@ -32,16 +32,5 @@ namespace TaskRouter.Web.Tests.Controllers
                          selectedProduct, data.XPathSelectElement("Response/Enqueue/Task").Value);
                  });
         }
-
-        [Test]
-        public void Assignment()
-        {
-            var controller = new CallController();
-            controller.WithCallTo(c => c.Assignment())
-                .ShouldReturnJson(data =>
-                 {
-                     Assert.That(data.instruction, Is.EqualTo("dequeue"));
-                 });
-        }
     }
 }
