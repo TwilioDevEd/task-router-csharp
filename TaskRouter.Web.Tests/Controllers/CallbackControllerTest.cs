@@ -7,7 +7,7 @@ namespace TaskRouter.Web.Tests.Controllers
     public class CallbackControllerTest
     {
         [Test]
-        public void Assignment()
+        public void Assignment_RespondsWithDequeue()
         {
             var controller = new CallbackController();
             controller.WithCallTo(c => c.Assignment())

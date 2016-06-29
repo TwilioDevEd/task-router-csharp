@@ -11,7 +11,7 @@ namespace TaskRouter.Web.Tests.Controllers
     public class HomeControllerTest
     {
         [Test]
-        public void Index()
+        public void Index_RespondsWithDefaultView()
         {
             var mockService = new Mock<IMissedCallsService>();
             mockService.Setup(s => s.FindAllAsync()).ReturnsAsync(new List<MissedCall>());
