@@ -1,0 +1,29 @@
+.chapter(data-title='TaskRouter Rails')
+  .step(
+    data-title='Application Overview',
+    data-file='App_Start/WorkspaceConfig.cs')
+    :markdown
+      ## Application Overview
+
+      In this tutorial we will show how to automate the routing of calls from
+      customers to your support agents. Customers will be able to select a
+      product and wait while TaskRouter tries to contact a product
+      specialist for the best support experience. If no one is available, our
+      application will save the customer's number and selected product so
+      an agent can call them back later on.
+
+      This is what the application does at a high level:
+
+      1. Configure a workspace using the Twilio's [TaskRouter REST API][api-main].
+      1. Listen for incoming calls and let the user select a product with the dial pad.
+      1. Create a Task with the selected product and let TaskRouter handle it.
+      1. Store missed calls so agents can return the call to customers.
+      1. Redirect users to a voice mail when no one answers the call.
+      1. Allow agents to change their status (Available/Offline) via SMS.
+
+      ---
+      **See Also:**
+      * [Getting Started with Twilio TaskRouter](//www.twilio.com/docs/quickstart/csharp/taskrouter)
+      * [Twilio C# Helper Library](//www.twilio.com/docs/libraries/csharp)
+
+      [api-main]: //www.twilio.com/docs/api/taskrouter/rest-api
