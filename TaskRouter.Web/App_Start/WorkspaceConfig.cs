@@ -10,6 +10,10 @@ namespace TaskRouter.Web
         private readonly TaskRouterClient _client;
         private readonly string hostUrl = Config.HostUrl;
 
+        private const string VoiceQueue = "VoiceQueue";
+        private const string SMSQueue = "SMSQueue";
+        private const string AllQueue = "AllQueue";
+
         public static void RegisterWorkspace()
         {
             new WorkspaceConfig().Register();
@@ -29,12 +33,65 @@ namespace TaskRouter.Web
         {
             var workspace = DeleteAndCreateWorkspace("Twilio Workspace", string.Format("{0}/callback/events", hostUrl));
             var workspaceSid = workspace.Sid;
-            Singleton.Instance.WorkspaceSid = workspaceSid;
 
-            CreateWorkers(workspaceSid);
-
-            var reservationActivity = GetActivityByFriendlyName(workspaceSid, "Reserved");
             var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Busy");
+            var reservationActivity = GetActivityByFriendlyName(workspaceSid, "Reserved");
+            var idleActivity = GetActivityByFriendlyName(workspaceSid, "Idle");
+            var offlineActivity = GetActivityByFriendlyName(workspaceSid, "Offline");
+
+            CreateWorkers(workspaceSid, idleActivity);
+
+            var taskQueues = CreateTaskQueues(workspaceSid, assignmentActivity, reservationActivity);
+            var workflow = CreateWorkflow(workspaceSid, taskQueues);
+
+            Singleton.Instance.WorkspaceSid = workspaceSid;
+            Singleton.Instance.WorkflowSid = workflow.Sid;
+            Singleton.Instance.PostWorkActivitySid = idleActivity.Sid;
+            Singleton.Instance.IdleActivitySid = idleActivity.Sid;
+            Singleton.Instance.OfflineActivitySid = offlineActivity.Sid;
+        }
+
+        private Workspace DeleteAndCreateWorkspace(string friendlyName, string eventCallbackUrl) {
+            var workspace = GetWorkspaceByFriendlyName(friendlyName);
+            if (workspace != null)
+            {
+                _client.DeleteWorkspace(workspace.Sid);
+            }
+
+            return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
+        }
+
+        private void CreateWorkers(string workspaceSid, Activity activity)
+        {
+            var attributesForBob =
+                "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"" + Config.AgentForProgrammableSMS + "\"}";
+            _client.AddWorker(workspaceSid, "Bob", activity.Sid, attributesForBob);
+
+            var attributesForAlice =
+                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"" + Config.AgentForProgrammableVoice + "\"}";
+            _client.AddWorker(workspaceSid, "Alice", activity.Sid, attributesForAlice);
+        }
+
+        private TaskQueue CreateTaskQueue(
+            string workspaceSid, string friendlyName,
+            string assignmentActivitySid, string reservationActivitySid, string targetWorkers)
+        {
+            var queue = _client.AddTaskQueue(
+                workspaceSid, friendlyName, assignmentActivitySid, reservationActivitySid, string.Empty, null);
+            _client.UpdateTaskQueue(
+                workspaceSid,
+                queue.Sid,
+                friendlyName,
+                assignmentActivitySid,
+                reservationActivitySid,
+                targetWorkers, 1);
+
+            return queue;
+        }
+
+        private IDictionary<string, TaskQueue> CreateTaskQueues(
+            string workspaceSid, Activity assignmentActivity, Activity reservationActivity)
+        {
 
             var voiceQueue = CreateTaskQueue(
                 workspaceSid, "Voice",
@@ -48,7 +105,19 @@ namespace TaskRouter.Web
                 workspaceSid, "All",
                 assignmentActivity.Sid, reservationActivity.Sid, "1 == 1");
 
-            // Workflow
+            return new Dictionary<string, TaskQueue> {
+                { VoiceQueue, voiceQueue },
+                { SMSQueue, smsQueue },
+                { AllQueue, allQueue }
+            };
+        }
+
+        private Workflow CreateWorkflow(string workspaceSid, IDictionary<string, TaskQueue> taskQueues)
+        {
+            var voiceQueue = taskQueues[VoiceQueue];
+            var smsQueue = taskQueues[SMSQueue];
+            var allQueue = taskQueues[AllQueue];
+
             var voiceFilter = new Filter()
             {
                 FriendlyName = "Voice",
@@ -81,59 +150,13 @@ namespace TaskRouter.Web
             var workflowJSON = "{\"task_routing\":" + workflowConfiguration.ToString() + "}";
 
             // Call REST API
-            Workflow workflow = _client.AddWorkflow(
+            return _client.AddWorkflow(
                 workspaceSid,
                 "Tech Support",
                 workflowJSON,
                 string.Format("{0}/callback/assignment", hostUrl),
                 string.Format("{0}/callback/assignment", hostUrl),
                 15);
-            Singleton.Instance.WorkflowSid = workflow.Sid;
-
-            var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
-            var offline = GetActivityByFriendlyName(workspaceSid, "Offline");
-            Singleton.Instance.PostWorkActivitySid = idle.Sid;
-            Singleton.Instance.IdleActivitySid = idle.Sid;
-            Singleton.Instance.OfflineActivitySid = offline.Sid;
-        }
-
-        private Workspace DeleteAndCreateWorkspace(string friendlyName, string eventCallbackUrl) {
-            var workspace = GetWorkspaceByFriendlyName(friendlyName);
-            if (workspace != null)
-            {
-                _client.DeleteWorkspace(workspace.Sid);
-            }
-
-            return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
-        }
-
-        private void CreateWorkers(string workspaceSid)
-        {
-            var idle = GetActivityByFriendlyName(workspaceSid, "Idle");
-            var attributesForBob =
-                "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"" + Config.AgentForProgrammableSMS + "\"}";
-            _client.AddWorker(workspaceSid, "Bob", idle.Sid, attributesForBob);
-
-            var attributesForAlice =
-                "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"" + Config.AgentForProgrammableVoice + "\"}";
-            _client.AddWorker(workspaceSid, "Alice", idle.Sid, attributesForAlice);
-        }
-
-        private TaskQueue CreateTaskQueue(
-            string workspaceSid, string friendlyName,
-            string assignmentActivitySid, string reservationActivitySid, string targetWorkers)
-        {
-            var queue = _client.AddTaskQueue(
-                workspaceSid, friendlyName, assignmentActivitySid, reservationActivitySid, string.Empty, null);
-            _client.UpdateTaskQueue(
-                workspaceSid,
-                queue.Sid,
-                friendlyName,
-                assignmentActivitySid,
-                reservationActivitySid,
-                targetWorkers, 1);
-
-            return queue;
         }
 
         private Activity GetActivityByFriendlyName(string workspaceSid, string friendlyName)
