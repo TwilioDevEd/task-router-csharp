@@ -39,13 +39,13 @@ namespace TaskRouter.Web
             var idleActivity = GetActivityByFriendlyName(workspaceSid, "Idle");
             var offlineActivity = GetActivityByFriendlyName(workspaceSid, "Offline");
 
-            CreateWorkers(workspaceSid, idleActivity);
-
+            var workers = CreateWorkers(workspaceSid, idleActivity);
             var taskQueues = CreateTaskQueues(workspaceSid, assignmentActivity, reservationActivity);
             var workflow = CreateWorkflow(workspaceSid, taskQueues);
 
             Singleton.Instance.WorkspaceSid = workspaceSid;
             Singleton.Instance.WorkflowSid = workflow.Sid;
+            Singleton.Instance.Workers = workers;
             Singleton.Instance.PostWorkActivitySid = idleActivity.Sid;
             Singleton.Instance.IdleActivitySid = idleActivity.Sid;
             Singleton.Instance.OfflineActivitySid = offlineActivity.Sid;
@@ -61,15 +61,21 @@ namespace TaskRouter.Web
             return _client.AddWorkspace(friendlyName, eventCallbackUrl, null);
         }
 
-        private void CreateWorkers(string workspaceSid, Activity activity)
+        private IDictionary<string, string> CreateWorkers(string workspaceSid, Activity activity)
         {
             var attributesForBob =
                 "{\"products\": [\"ProgrammableSMS\"], \"contact_uri\": \"" + Config.AgentForProgrammableSMS + "\"}";
-            _client.AddWorker(workspaceSid, "Bob", activity.Sid, attributesForBob);
+            var bob = _client.AddWorker(workspaceSid, "Bob", activity.Sid, attributesForBob);
 
             var attributesForAlice =
                 "{\"products\": [\"ProgrammableVoice\"], \"contact_uri\": \"" + Config.AgentForProgrammableVoice + "\"}";
-            _client.AddWorker(workspaceSid, "Alice", activity.Sid, attributesForAlice);
+            var alice = _client.AddWorker(workspaceSid, "Alice", activity.Sid, attributesForAlice);
+
+            return new Dictionary<string, string>
+            {
+                { Config.AgentForProgrammableSMS, bob.Sid },
+                { Config.AgentForProgrammableVoice, alice.Sid },
+            };
         }
 
         private TaskQueue CreateTaskQueue(

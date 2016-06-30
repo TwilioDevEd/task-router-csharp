@@ -90,7 +90,6 @@ namespace TaskRouter.Web.Controllers
             string workerPhoneNumber = attributes.contact_uri;
 
             _client.SendMessage(Config.TwilioNumber, workerPhoneNumber, message);
-            Singleton.Instance.Workers[workerPhoneNumber] = workerSid;
         }
 
         private void VoiceMail(string callSid)
