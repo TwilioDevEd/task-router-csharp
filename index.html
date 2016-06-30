@@ -1,0 +1,249 @@
+<!DOCTYPE html><html><head><title>Task Router with ASP.NET MVC</title><style>body, html {
+  height:100%;
+  width:100%;
+  padding:0;
+  margin:0;
+  overflow:hidden;
+  background-color:#ddd;
+}
+.wrapper {
+  height:100%;
+  width:100%;
+}</style><link rel="shortcut icon" href="//twilio.com/bundles/marketing/img/favicons/favicon.ico"><link rel="apple-touch-icon" href="//twilio.com/bundles/marketing/img/favicons/favicon_57.png"><link rel="apple-touch-icon" sizes="72x72" href="//twilio.com/bundles/marketing/img/favicons/favicon_72.png"><link rel="apple-touch-icon" sizes="114x114" href="//twilio.com/bundles/marketing/img/favicons/favicon_114.png"><link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"><link rel="stylesheet" href="viewsaurus.css"></head><body><div class="wrapper"><div id="viewsaurus" data-title="Task Router with ASP.NET MVC"><div class="saurus-panes"><div class="saurus-prose"><div class="saurus-prose-header"><div class="title-outer"><span class="step-title">Task Router with ASP.NET MVC</span></div></div><div class="saurus-nav-buttons"><div class="saurus-nav-button nav-overview"><div class="saurus-nav-button-inner"><i class="fa fa-fw fa-list"></i></div><div class="nav-divider"></div></div><div class="saurus-nav-button nav-previous"><div class="saurus-nav-button-inner"><a href=""> <i class="fa fa-fw fa-play fa-rotate-180"></i></a></div><div class="nav-divider"></div></div><div class="saurus-nav-button nav-next clickable"><div class="saurus-nav-button-inner"><a href="#1"> <i class="fa fa-fw fa-play"></i></a></div></div><div class="saurus-next-title"><span class="next-title-inner"></span></div></div><div class="saurus-progress-bar"></div><div class="saurus-start"><p>Give your customers specialized product support. Learn how to use TaskRouter to create a workflow that will redirect users to an appropriate sales agent, based on the product they select.</p><a href="#0">Start Tutorial</a></div><div class="saurus-content"><div data-title="TaskRouter ASP.NET MVC" class="chapter"><div data-title="Application Overview" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" class="step"><h2 id="application-overview">Application Overview</h2>
+<p>In this tutorial we will show how to automate the routing of calls from
+customers to your support agents. Customers will be able to select a
+product and wait while TaskRouter tries to contact a product
+specialist for the best support experience. If no one is available, our
+application will save the customer&#39;s number and selected product so
+an agent can call them back later on.</p>
+<p>This is what the application does at a high level:</p>
+<ol>
+<li>Configure a workspace using the Twilio&#39;s <a href="//www.twilio.com/docs/api/taskrouter/rest-api">TaskRouter REST API</a>.</li>
+<li>Listen for incoming calls and let the user select a product with the dial pad.</li>
+<li>Create a Task with the selected product and let TaskRouter handle it.</li>
+<li>Store missed calls so agents can return the call to customers.</li>
+<li>Redirect users to a voice mail when no one answers the call.</li>
+<li>Allow agents to change their status (Available/Offline) via SMS.</li>
+</ol>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/quickstart/csharp/taskrouter">Getting Started with Twilio TaskRouter</a></li>
+<li><a href="//www.twilio.com/docs/libraries/csharp">Twilio C# Helper Library</a></li>
+</ul>
+</div><div data-title="Configuring the Workspace" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-highlight="32-52" class="step"><h2 id="configuring-the-workspace">Configuring the Workspace</h2>
+<p>In order to instruct TaskRouter to handle the Tasks, we need to
+configure a Workspace. This is possible either using the <a href="//www.twilio.com/console/taskrouter/workspaces">TaskRouter
+Console</a> or
+programmatically through <a href="//www.twilio.com/docs/api/taskrouter/rest-api">TaskRouter REST API</a>.</p>
+<p>In this ASP.NET MVC application this step will be executed in the
+<code>Application_Start</code> event every time you run the app.</p>
+<p>A <a href="//www.twilio.com/docs/api/taskrouter/workspaces">Workspace</a> is the container element for any TaskRouter
+application. The elements are:</p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/tasks">Tasks</a>. Represents a customer trying to contact an agent.</li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workers">Workers</a>. The agents responsible for handling Tasks.</li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/taskqueues">Task Queues</a>. Holds Tasks to be consumed by a set of Workers.</li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workflows">Workflows</a>. Responsible for matching Tasks into Task Queues.</li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/activities">Activities</a>. Possible states of a Worker. Eg: idle, offline, busy.</li>
+</ul>
+<p>We&#39;ll use a <code>TaskRouterClient</code> provided in the <a href="//github.com/twilio/twilio-csharp">twilio-csharp</a>
+helper library to create and configure the workspace.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/rest-api">TaskRouter: REST API Reference</a></li>
+<li><a href="//www.twilio.com/docs/quickstart/csharp/taskrouter">TaskRouter .NET Quickstart</a></li>
+</ul>
+</div><div data-title="Creating a Workspace" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-highlight="54-62" class="step"><h2 id="creating-a-workspace">Creating a Workspace</h2>
+<p>Before creating a workspace, we&#39;ll always delete one if it has the
+same <code>friendlyName</code> as the one we are trying to create. In order to
+create a workspace you only need to provide a <code>friendlyName</code> and a
+<code>eventCallbackUrl</code> where request will be made every time an event is
+triggered in our workspace.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workspaces">TaskRouter REST API: Workspace</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workspaces#action-create">Creating a Workspace</a></li>
+</ul>
+</div><div data-title="Creating the Workers" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-highlight="64-79" class="step"><h2 id="creating-the-workers">Creating the Workers</h2>
+<p>We&#39;ll create two workers, <strong>bob</strong> and <strong>alice</strong>. They each hold two
+attributes: <code>contact_uri</code> with a phone number and <code>products</code> with a
+list of the products which each worker is specialized in. We also
+need to specify an <code>activity.Sid</code> and a name for each worker. The
+selected activity will define the status of the worker.</p>
+<p>A set of <a href="//www.twilio.com/docs/api/taskrouter/activities#default-activities">default activities</a>
+is created with your workspace. We use the <strong>Idle</strong> activity to make a
+worker <strong>available</strong> for incoming calls.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workers">TaskRouter REST API: Workers</a></li>
+</ul>
+</div><div data-title="Creating the Task Queues" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-highlight="81-119" class="step"><h2 id="creating-the-task-queues">Creating the Task Queues</h2>
+<p>Next, we set up the Task Queues. Each with a <code>friendlyName</code> and a
+<code>targetWorkers</code>, which is an expression to match Workers. Our Task
+Queues are:</p>
+<ol>
+<li><code>SMS</code>. Will target Workers specialized in Programmable SMS, such
+as Bob, using the expression <code>&quot;products HAS &#39;ProgrammableSMS&#39;&quot;</code>.</li>
+<li><code>Voice</code>. Will do the same for Programmable Voice Workers, such
+as Alice, using the expression <code>&quot;products HAS &#39;ProgrammableVoice&#39;&quot;</code>.</li>
+<li><code>All</code>. This queue targets all users and can be used when there are
+no specialist around for the chosen product. We can use the <code>&quot;1 == 1&quot;</code>
+expression here.</li>
+</ol>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/taskqueues">TaskRouter REST API: Task Queues</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/taskqueues#target-workers">TargetWorkers&#39;s Expressions</a></li>
+</ul>
+</div><div data-title="Creating a Workflow" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-highlight="121-166" class="step"><h2 id="creating-a-workflow">Creating a Workflow</h2>
+<p>Finally, we create the Workflow using the following parameters:</p>
+<ol>
+<li><code>friendlyName</code> as the name of a Workflow.</li>
+<li><code>assignmentCallbackUrl</code> and <code>fallbackAssignmentCallbackUrl</code>
+as the public URL where a request will be made when this Workflow
+assigns a Task to a Worker. We will learn how to implement it on the next steps.</li>
+<li><code>taskReservationTimeout</code> as the maximum time we want to wait until a Worker is available for handling a Task.</li>
+<li><code>configuration</code> which is a set of rules for matching Tasks into Task Queues.
+The routing configuration will take a Task attributes and match with Task
+Queues. This application&#39;s Workflow rules are defined as:<ol>
+<li><code>&quot;selected_product==\&quot;ProgrammableSMS\&quot;&quot;</code> expression for <code>SMS</code> Task
+Queue. This expression will match any Task with <code>ProgrammableSMS</code> as
+the <code>selected_product</code> attribute.</li>
+<li><code>&quot;selected_product==\&quot;ProgrammableVoice\&quot;&quot;</code> expression for <code>Voice</code>
+Task Queue.</li>
+</ol>
+</li>
+</ol>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/workflows">TaskRouter REST API: Workflows</a></li>
+</ul>
+</div><div data-title="Handling Twilio's Request" data-file="TaskRouter.Web/Controllers/CallController.cs" data-highlight="24-34" class="step"><h2 id="handling-twilio-s-request">Handling Twilio&#39;s Request</h2>
+<p>Right after receiving a call, Twilio will send a request to the
+URL specified on the <a href="//www.twilio.com/console/phone-numbers/incoming">number&#39;s configuration</a>.</p>
+<p>The endpoint will then process the request and generate a TwiML response.
+We&#39;ll use the Say verb to give the user product alternatives, and a key
+they can press in order to select one. The Gather verb allows us to
+capture the user&#39;s key press.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/platform/webhooks">Twilio webhooks</a></li>
+<li><a href="//www.twilio.com/docs/api/twiml/your_response">TwiML Voice: Your Response</a></li>
+<li><a href="//www.twilio.com/docs/api/twiml/say">TwiML Voice: &lt;Say&gt; verb</a></li>
+<li><a href="//www.twilio.com/docs/api/twiml/gather">TwiML Voice: &lt;Gather&gt; verb</a></li>
+</ul>
+</div><div data-title="Creating a Task" data-file="TaskRouter.Web/Controllers/CallController.cs" data-highlight="36-47" class="step"><h2 id="creating-a-task">Creating a Task</h2>
+<p>This is the endpoint set as the <code>action</code> URL on the <code>Gather</code> verb on the
+previous step. A request is made to this endpoint when the user presses
+a key during the call.
+This request has a <code>digits</code> parameter that holds the pressed keys.
+A <strong>Task</strong> will be created based on the pressed digit with the
+<code>selected_product</code> as an attribute. The Workflow will take this Task&#39;s
+attributes and match with the <a href="//www.twilio.com/docs/api/taskrouter/expression-syntax">configured
+expressions</a>
+in order to find a Task Queue for this Task, so an appropriate available
+Worker can be assigned to handle it.</p>
+<p>We use the <a href="//www.twilio.com/docs/api/twiml/enqueue"><code>Enqueue</code> verb</a> with a <code>WorkflowSid</code> attribute
+to <a href="//www.twilio.com/docs/api/taskrouter/twiml-integration#using-enqueue-to-route-calls-with-taskrouter">integrate with TaskRouter</a>. Then the voice call will
+be put on hold while TaskRouter tries to find an available Worker to
+handle this Task.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/twiml/twilio_request">TwiML Voice: Twilio&#39;s Request</a></li>
+<li><a href="//www.twilio.com/docs/api/twiml/gather#attributes-action-parameters">TwiML Voice: &lt;Gather&gt; callback attributes</a></li>
+<li><a href="//www.twilio.com/docs/api/twiml/enqueue">TwiML Voice: &lt;Enqueue&gt; verb</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/twiml-integration#using-enqueue-to-route-calls-with-taskrouter">TaskRouter: Using &lt;Enqueue&gt; to route calls with TaskRouter</a></li>
+</ul>
+</div><div data-title="Assigning a Worker" data-file="TaskRouter.Web/Controllers/CallbackController.cs" data-highlight="29-39" class="step"><h2 id="assigning-a-worker">Assigning a Worker</h2>
+<p>When TaskRouter selects a Worker, it does the following:</p>
+<ol>
+<li>The Task&#39;s Assignment Status is set to <strong>reserved</strong>.</li>
+<li>A <a href="//www.twilio.com/docs/api/taskrouter/reservations">Reservation instance</a> is generated,
+linking the Task to the selected Worker.</li>
+<li>At the same time the Reservation is created, a POST request is
+made to the Workflow&#39;s AssignmentCallbackURL, which was configured using
+the <a href="//github.com/TwilioDevEd/task-router-csharp/blob/d7abbf5ffd8239e9a1bf9d706b8c929e63eadf65/TaskRouter.Web/App_Start/WorkspaceConfig.cs#L163">WorkspaceConfig</a> class when the application is initialized.
+This request includes the full details of the Task, the selected Worker,
+and the Reservation.</li>
+</ol>
+<p>Handling this <a href="//www.twilio.com/docs/api/taskrouter/handling-assignment-callbacks">Assignment Callback</a> is a key
+component of building a TaskRouter application as we can instruct how the
+Worker will handle a Task. We could send a text, e-mail, push
+notifications or deliver a call.</p>
+<p>Since we created this Task during a voice call with an <code>Enqueue</code> verb,
+let&#39;s <a href="//www.twilio.com/docs/api/taskrouter/handling-assignment-callbacks#dequeue-call">instruct TaskRouter to dequeue</a> the call and dial
+a Worker. If we do not specify a <code>to</code> parameter with a
+phone number, TaskRouter will pick the Worker&#39;s <code>contact_uri</code> attribute.</p>
+<p>We also send a <code>post_work_activity_sid</code> which will tell TaskRouter which
+<a href="//www.twilio.com/docs/quickstart/csharp/taskrouter/setup-understanding-activities">Activity</a> to assign this worker after the call ends.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/handling-assignment-callbacks">Assigning Tasks to Workers: Handling Assignment Callbacks</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/handling-assignment-callbacks#dequeue-call">Assigning Tasks to Workers: Dequeue a call from a TwiML queue</a></li>
+<li><a href="//www.twilio.com/docs/quickstart/csharp/taskrouter/setup-understanding-activities">TaskRouter Quickstart: Understanding Activities</a></li>
+</ul>
+</div><div data-title="Collecting Missed Calls" data-file="TaskRouter.Web/Controllers/CallbackController.cs" data-highlight="41-63,70-83,95-101" class="step"><h2 id="collecting-missed-calls">Collecting Missed Calls</h2>
+<p>This endpoint will be called after each <a href="//www.twilio.com/docs/api/taskrouter/events#event-types">TaskRouter Event</a>
+is triggered. In our application, we are trying to collect missed calls,
+so we would like to handle the <code>workflow.timeout</code> event. This event is
+triggered when the Task waits more than the limit set on Workflow
+Configuration, which happens when no available worker is found after
+trying out all possible Task Queues configured as rules for this
+Workflow.</p>
+<p>Here we use TwilioRestClient to route this call into a <a href="//www.twilio.com/labs/twimlets/voicemail">Voicemail
+Twimlet</a>. Twimlets are tiny web applications for
+voice.  This one will generate a <code>TwiML</code> response using <code>Say</code> verb and
+record a message using <code>Record</code> verb. After recorded, the message will be
+transcribed and sent to the mail address we configured on
+<code>VoiceMail</code> configuration settings.</p>
+<p>Note that we are also listening for <code>task.canceled</code>. This is triggered
+when the customer hangs up before being assigned to an agent, therefore
+canceling the task. Capturing this event allows us to collect the
+information from the customers that hang up before the Workflow times out.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/events">TaskRouter: Events</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/events#event-types">TaskRouter: Event types</a></li>
+<li><a href="//www.twilio.com/labs/twimlets">Twilio Twimlets</a></li>
+</ul>
+</div><div data-title="Changing a Worker's Activity" data-file="TaskRouter.Web/Controllers/MessageController.cs" data-highlight="27-51" class="step"><h2 id="changing-a-worker-s-activity">Changing a Worker&#39;s Activity</h2>
+<p>We have created this endpoint, so a worker can send an SMS message to the support
+line Twilio number with the command &quot;On&quot; or &quot;Off&quot; to change their availability status.</p>
+<p>This is important as a worker&#39;s activity will change to <code>Offline</code> when they miss
+a call. When this happens, they receive an SMS letting them know that their activity
+has changed, and that they can reply with the <code>On</code> command to make themselves
+available for incoming calls again.</p>
+<hr>
+<p><strong>See Also:</strong></p>
+<ul>
+<li><a href="//www.twilio.com/docs/api/taskrouter/events">TaskRouter: Events</a></li>
+<li><a href="//www.twilio.com/docs/api/taskrouter/events#event-types">TaskRouter: Event types</a></li>
+</ul>
+</div><div class="step"><h2 id="where-to-next-">Where to Next?</h2>
+<p>That&#39;s it!</p>
+<p>If you&#39;re a .NET developer working with Twilio, you might also enjoy these
+tutorials:</p>
+<p><a href="//www.twilio.com/docs/tutorials/walkthrough/browser-calls/csharp/mvc"><strong>Browser-Calls</strong></a></p>
+<p>Learn how to use Twilio Client to make browser-to-phone and browser-to-browser calls with ease.</p>
+<p><a href="//www.twilio.com/docs/tutorials/walkthrough/eta-notifications/csharp/mvc"><strong>ETA-Notifications</strong></a></p>
+<p>Learn how to implement ETA Notifications using ASP.NET MVC and Twilio.</p>
+<p>Thanks for checking this tutorial out! If you have any feedback
+to share with us, we&#39;d love to hear it.
+<a href="mailto:deved-oss@twilio.com">Contact the Twilio Developer Education Team</a> to let us know what you think.</p>
+</div></div>
+<div class="saurus-files" style="display:none;"><textarea class="saurus-file" data-file="TaskRouter.Web/App_Start/WorkspaceConfig.cs" data-mode="csharp">77u/dXNpbmcgU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWM7CnVzaW5nIFN5c3RlbS5MaW5xOwp1c2luZyBUYXNrUm91dGVyLldlYi5JbmZyYXN0cnVjdHVyZTsKdXNpbmcgVHdpbGlvLlRhc2tSb3V0ZXI7CgpuYW1lc3BhY2UgVGFza1JvdXRlci5XZWIKewogICAgcHVibGljIGNsYXNzIFdvcmtzcGFjZUNvbmZpZwogICAgewogICAgICAgIHByaXZhdGUgcmVhZG9ubHkgVGFza1JvdXRlckNsaWVudCBfY2xpZW50OwogICAgICAgIHByaXZhdGUgcmVhZG9ubHkgc3RyaW5nIGhvc3RVcmwgPSBDb25maWcuSG9zdFVybDsKCiAgICAgICAgcHJpdmF0ZSBjb25zdCBzdHJpbmcgVm9pY2VRdWV1ZSA9ICJWb2ljZVF1ZXVlIjsKICAgICAgICBwcml2YXRlIGNvbnN0IHN0cmluZyBTTVNRdWV1ZSA9ICJTTVNRdWV1ZSI7CiAgICAgICAgcHJpdmF0ZSBjb25zdCBzdHJpbmcgQWxsUXVldWUgPSAiQWxsUXVldWUiOwoKICAgICAgICBwdWJsaWMgc3RhdGljIHZvaWQgUmVnaXN0ZXJXb3Jrc3BhY2UoKQogICAgICAgIHsKICAgICAgICAgICAgbmV3IFdvcmtzcGFjZUNvbmZpZygpLlJlZ2lzdGVyKCk7CiAgICAgICAgfQoKICAgICAgICBwdWJsaWMgV29ya3NwYWNlQ29uZmlnKCkKICAgICAgICB7CiAgICAgICAgICAgIF9jbGllbnQgPSBuZXcgVGFza1JvdXRlckNsaWVudChDb25maWcuQWNjb3VudFNJRCwgQ29uZmlnLkF1dGhUb2tlbik7CiAgICAgICAgfQoKICAgICAgICBwdWJsaWMgV29ya3NwYWNlQ29uZmlnKFRhc2tSb3V0ZXJDbGllbnQgY2xpZW50KQogICAgICAgIHsKICAgICAgICAgICAgX2NsaWVudCA9IGNsaWVudDsKICAgICAgICB9CgogICAgICAgIHB1YmxpYyB2b2lkIFJlZ2lzdGVyKCkKICAgICAgICB7CiAgICAgICAgICAgIHZhciB3b3Jrc3BhY2UgPSBEZWxldGVBbmRDcmVhdGVXb3Jrc3BhY2UoIlR3aWxpbyBXb3Jrc3BhY2UiLCBzdHJpbmcuRm9ybWF0KCJ7MH0vY2FsbGJhY2svZXZlbnRzIiwgaG9zdFVybCkpOwogICAgICAgICAgICB2YXIgd29ya3NwYWNlU2lkID0gd29ya3NwYWNlLlNpZDsKCiAgICAgICAgICAgIHZhciBhc3NpZ25tZW50QWN0aXZpdHkgPSBHZXRBY3Rpdml0eUJ5RnJpZW5kbHlOYW1lKHdvcmtzcGFjZVNpZCwgIkJ1c3kiKTsKICAgICAgICAgICAgdmFyIHJlc2VydmF0aW9uQWN0aXZpdHkgPSBHZXRBY3Rpdml0eUJ5RnJpZW5kbHlOYW1lKHdvcmtzcGFjZVNpZCwgIlJlc2VydmVkIik7CiAgICAgICAgICAgIHZhciBpZGxlQWN0aXZpdHkgPSBHZXRBY3Rpdml0eUJ5RnJpZW5kbHlOYW1lKHdvcmtzcGFjZVNpZCwgIklkbGUiKTsKICAgICAgICAgICAgdmFyIG9mZmxpbmVBY3Rpdml0eSA9IEdldEFjdGl2aXR5QnlGcmllbmRseU5hbWUod29ya3NwYWNlU2lkLCAiT2ZmbGluZSIpOwoKICAgICAgICAgICAgdmFyIHdvcmtlcnMgPSBDcmVhdGVXb3JrZXJzKHdvcmtzcGFjZVNpZCwgaWRsZUFjdGl2aXR5KTsKICAgICAgICAgICAgdmFyIHRhc2tRdWV1ZXMgPSBDcmVhdGVUYXNrUXVldWVzKHdvcmtzcGFjZVNpZCwgYXNzaWdubWVudEFjdGl2aXR5LCByZXNlcnZhdGlvbkFjdGl2aXR5KTsKICAgICAgICAgICAgdmFyIHdvcmtmbG93ID0gQ3JlYXRlV29ya2Zsb3cod29ya3NwYWNlU2lkLCB0YXNrUXVldWVzKTsKCiAgICAgICAgICAgIFNpbmdsZXRvbi5JbnN0YW5jZS5Xb3Jrc3BhY2VTaWQgPSB3b3Jrc3BhY2VTaWQ7CiAgICAgICAgICAgIFNpbmdsZXRvbi5JbnN0YW5jZS5Xb3JrZmxvd1NpZCA9IHdvcmtmbG93LlNpZDsKICAgICAgICAgICAgU2luZ2xldG9uLkluc3RhbmNlLldvcmtlcnMgPSB3b3JrZXJzOwogICAgICAgICAgICBTaW5nbGV0b24uSW5zdGFuY2UuUG9zdFdvcmtBY3Rpdml0eVNpZCA9IGlkbGVBY3Rpdml0eS5TaWQ7CiAgICAgICAgICAgIFNpbmdsZXRvbi5JbnN0YW5jZS5JZGxlQWN0aXZpdHlTaWQgPSBpZGxlQWN0aXZpdHkuU2lkOwogICAgICAgICAgICBTaW5nbGV0b24uSW5zdGFuY2UuT2ZmbGluZUFjdGl2aXR5U2lkID0gb2ZmbGluZUFjdGl2aXR5LlNpZDsKICAgICAgICB9CgogICAgICAgIHByaXZhdGUgV29ya3NwYWNlIERlbGV0ZUFuZENyZWF0ZVdvcmtzcGFjZShzdHJpbmcgZnJpZW5kbHlOYW1lLCBzdHJpbmcgZXZlbnRDYWxsYmFja1VybCkgewogICAgICAgICAgICB2YXIgd29ya3NwYWNlID0gR2V0V29ya3NwYWNlQnlGcmllbmRseU5hbWUoZnJpZW5kbHlOYW1lKTsKICAgICAgICAgICAgaWYgKHdvcmtzcGFjZSAhPSBudWxsKQogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBfY2xpZW50LkRlbGV0ZVdvcmtzcGFjZSh3b3Jrc3BhY2UuU2lkKTsKICAgICAgICAgICAgfQoKICAgICAgICAgICAgcmV0dXJuIF9jbGllbnQuQWRkV29ya3NwYWNlKGZyaWVuZGx5TmFtZSwgZXZlbnRDYWxsYmFja1VybCwgbnVsbCk7CiAgICAgICAgfQoKICAgICAgICBwcml2YXRlIElEaWN0aW9uYXJ5PHN0cmluZywgc3RyaW5nPiBDcmVhdGVXb3JrZXJzKHN0cmluZyB3b3Jrc3BhY2VTaWQsIEFjdGl2aXR5IGFjdGl2aXR5KQogICAgICAgIHsKICAgICAgICAgICAgdmFyIGF0dHJpYnV0ZXNGb3JCb2IgPQogICAgICAgICAgICAgICAgIntcInByb2R1Y3RzXCI6IFtcIlByb2dyYW1tYWJsZVNNU1wiXSwgXCJjb250YWN0X3VyaVwiOiBcIiIgKyBDb25maWcuQWdlbnRGb3JQcm9ncmFtbWFibGVTTVMgKyAiXCJ9IjsKICAgICAgICAgICAgdmFyIGJvYiA9IF9jbGllbnQuQWRkV29ya2VyKHdvcmtzcGFjZVNpZCwgIkJvYiIsIGFjdGl2aXR5LlNpZCwgYXR0cmlidXRlc0ZvckJvYik7CgogICAgICAgICAgICB2YXIgYXR0cmlidXRlc0ZvckFsaWNlID0KICAgICAgICAgICAgICAgICJ7XCJwcm9kdWN0c1wiOiBbXCJQcm9ncmFtbWFibGVWb2ljZVwiXSwgXCJjb250YWN0X3VyaVwiOiBcIiIgKyBDb25maWcuQWdlbnRGb3JQcm9ncmFtbWFibGVWb2ljZSArICJcIn0iOwogICAgICAgICAgICB2YXIgYWxpY2UgPSBfY2xpZW50LkFkZFdvcmtlcih3b3Jrc3BhY2VTaWQsICJBbGljZSIsIGFjdGl2aXR5LlNpZCwgYXR0cmlidXRlc0ZvckFsaWNlKTsKCiAgICAgICAgICAgIHJldHVybiBuZXcgRGljdGlvbmFyeTxzdHJpbmcsIHN0cmluZz4KICAgICAgICAgICAgewogICAgICAgICAgICAgICAgeyBDb25maWcuQWdlbnRGb3JQcm9ncmFtbWFibGVTTVMsIGJvYi5TaWQgfSwKICAgICAgICAgICAgICAgIHsgQ29uZmlnLkFnZW50Rm9yUHJvZ3JhbW1hYmxlVm9pY2UsIGFsaWNlLlNpZCB9LAogICAgICAgICAgICB9OwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSBUYXNrUXVldWUgQ3JlYXRlVGFza1F1ZXVlKAogICAgICAgICAgICBzdHJpbmcgd29ya3NwYWNlU2lkLCBzdHJpbmcgZnJpZW5kbHlOYW1lLAogICAgICAgICAgICBzdHJpbmcgYXNzaWdubWVudEFjdGl2aXR5U2lkLCBzdHJpbmcgcmVzZXJ2YXRpb25BY3Rpdml0eVNpZCwgc3RyaW5nIHRhcmdldFdvcmtlcnMpCiAgICAgICAgewogICAgICAgICAgICB2YXIgcXVldWUgPSBfY2xpZW50LkFkZFRhc2tRdWV1ZSgKICAgICAgICAgICAgICAgIHdvcmtzcGFjZVNpZCwgZnJpZW5kbHlOYW1lLCBhc3NpZ25tZW50QWN0aXZpdHlTaWQsIHJlc2VydmF0aW9uQWN0aXZpdHlTaWQsIHN0cmluZy5FbXB0eSwgbnVsbCk7CiAgICAgICAgICAgIF9jbGllbnQuVXBkYXRlVGFza1F1ZXVlKAogICAgICAgICAgICAgICAgd29ya3NwYWNlU2lkLAogICAgICAgICAgICAgICAgcXVldWUuU2lkLAogICAgICAgICAgICAgICAgZnJpZW5kbHlOYW1lLAogICAgICAgICAgICAgICAgYXNzaWdubWVudEFjdGl2aXR5U2lkLAogICAgICAgICAgICAgICAgcmVzZXJ2YXRpb25BY3Rpdml0eVNpZCwKICAgICAgICAgICAgICAgIHRhcmdldFdvcmtlcnMsIDEpOwoKICAgICAgICAgICAgcmV0dXJuIHF1ZXVlOwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSBJRGljdGlvbmFyeTxzdHJpbmcsIFRhc2tRdWV1ZT4gQ3JlYXRlVGFza1F1ZXVlcygKICAgICAgICAgICAgc3RyaW5nIHdvcmtzcGFjZVNpZCwgQWN0aXZpdHkgYXNzaWdubWVudEFjdGl2aXR5LCBBY3Rpdml0eSByZXNlcnZhdGlvbkFjdGl2aXR5KQogICAgICAgIHsKCiAgICAgICAgICAgIHZhciB2b2ljZVF1ZXVlID0gQ3JlYXRlVGFza1F1ZXVlKAogICAgICAgICAgICAgICAgd29ya3NwYWNlU2lkLCAiVm9pY2UiLAogICAgICAgICAgICAgICAgYXNzaWdubWVudEFjdGl2aXR5LlNpZCwgcmVzZXJ2YXRpb25BY3Rpdml0eS5TaWQsICJwcm9kdWN0cyBIQVMgJ1Byb2dyYW1tYWJsZVZvaWNlJyIpOwoKICAgICAgICAgICAgdmFyIHNtc1F1ZXVlID0gQ3JlYXRlVGFza1F1ZXVlKAogICAgICAgICAgICAgICAgd29ya3NwYWNlU2lkLCAiU01TIiwKICAgICAgICAgICAgICAgIGFzc2lnbm1lbnRBY3Rpdml0eS5TaWQsIHJlc2VydmF0aW9uQWN0aXZpdHkuU2lkLCAicHJvZHVjdHMgSEFTICdQcm9ncmFtbWFibGVTTVMnIik7CgogICAgICAgICAgICB2YXIgYWxsUXVldWUgPSBDcmVhdGVUYXNrUXVldWUoCiAgICAgICAgICAgICAgICB3b3Jrc3BhY2VTaWQsICJBbGwiLAogICAgICAgICAgICAgICAgYXNzaWdubWVudEFjdGl2aXR5LlNpZCwgcmVzZXJ2YXRpb25BY3Rpdml0eS5TaWQsICIxID09IDEiKTsKCiAgICAgICAgICAgIHJldHVybiBuZXcgRGljdGlvbmFyeTxzdHJpbmcsIFRhc2tRdWV1ZT4gewogICAgICAgICAgICAgICAgeyBWb2ljZVF1ZXVlLCB2b2ljZVF1ZXVlIH0sCiAgICAgICAgICAgICAgICB7IFNNU1F1ZXVlLCBzbXNRdWV1ZSB9LAogICAgICAgICAgICAgICAgeyBBbGxRdWV1ZSwgYWxsUXVldWUgfQogICAgICAgICAgICB9OwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSBXb3JrZmxvdyBDcmVhdGVXb3JrZmxvdyhzdHJpbmcgd29ya3NwYWNlU2lkLCBJRGljdGlvbmFyeTxzdHJpbmcsIFRhc2tRdWV1ZT4gdGFza1F1ZXVlcykKICAgICAgICB7CiAgICAgICAgICAgIHZhciB2b2ljZVF1ZXVlID0gdGFza1F1ZXVlc1tWb2ljZVF1ZXVlXTsKICAgICAgICAgICAgdmFyIHNtc1F1ZXVlID0gdGFza1F1ZXVlc1tTTVNRdWV1ZV07CiAgICAgICAgICAgIHZhciBhbGxRdWV1ZSA9IHRhc2tRdWV1ZXNbQWxsUXVldWVdOwoKICAgICAgICAgICAgdmFyIHZvaWNlRmlsdGVyID0gbmV3IEZpbHRlcigpCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgIEZyaWVuZGx5TmFtZSA9ICJWb2ljZSIsCiAgICAgICAgICAgICAgICBFeHByZXNzaW9uID0gInNlbGVjdGVkX3Byb2R1Y3Q9PVwiUHJvZ3JhbW1hYmxlVm9pY2VcIiIsCiAgICAgICAgICAgICAgICBUYXJnZXRzID0gbmV3IExpc3Q8VGFyZ2V0PigpIHsKICAgICAgICAgICAgICAgICAgICBuZXcgVGFyZ2V0IHsgUXVldWUgPSB2b2ljZVF1ZXVlLlNpZCwgUHJpb3JpdHkgPSAiNSIsIFRpbWVvdXQgPSAiMzAiIH0sCiAgICAgICAgICAgICAgICAgICAgbmV3IFRhcmdldCB7IFF1ZXVlID0gYWxsUXVldWUuU2lkLCBFeHByZXNzaW9uID0gIjE9PTEiLCBQcmlvcml0eSA9ICIxIiwgVGltZW91dCA9ICIzMCIgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9OwoKICAgICAgICAgICAgdmFyIHNtc0ZpbHRlciA9IG5ldyBGaWx0ZXIoKQogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBGcmllbmRseU5hbWUgPSAiU01TIiwKICAgICAgICAgICAgICAgIEV4cHJlc3Npb24gPSAic2VsZWN0ZWRfcHJvZHVjdD09XCJQcm9ncmFtbWFibGVTTVNcIiIsCiAgICAgICAgICAgICAgICBUYXJnZXRzID0gbmV3IExpc3Q8VGFyZ2V0PigpIHsKICAgICAgICAgICAgICAgICAgICBuZXcgVGFyZ2V0IHsgUXVldWUgPSBzbXNRdWV1ZS5TaWQsIFByaW9yaXR5ID0gIjUiLCBUaW1lb3V0ID0gIjMwIiB9LAogICAgICAgICAgICAgICAgICAgIG5ldyBUYXJnZXQgeyBRdWV1ZSA9IGFsbFF1ZXVlLlNpZCwgRXhwcmVzc2lvbiA9ICIxPT0xIiwgUHJpb3JpdHkgPSAiMSIsIFRpbWVvdXQgPSAiMzAiIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfTsKCiAgICAgICAgICAgIHZhciB3b3JrZmxvd0NvbmZpZ3VyYXRpb24gPSBuZXcgV29ya2Zsb3dDb25maWd1cmF0aW9uKCk7CgogICAgICAgICAgICB3b3JrZmxvd0NvbmZpZ3VyYXRpb24uRmlsdGVycy5BZGQodm9pY2VGaWx0ZXIpOwogICAgICAgICAgICB3b3JrZmxvd0NvbmZpZ3VyYXRpb24uRmlsdGVycy5BZGQoc21zRmlsdGVyKTsKICAgICAgICAgICAgd29ya2Zsb3dDb25maWd1cmF0aW9uLkRlZmF1bHRGaWx0ZXIgPSBuZXcgVGFyZ2V0KCkgewogICAgICAgICAgICAgICAgUXVldWUgPSBhbGxRdWV1ZS5TaWQsIEV4cHJlc3Npb24gPSAiMT09MSIsIFByaW9yaXR5ID0gIjEiLCBUaW1lb3V0ID0gIjMwIgogICAgICAgICAgICB9OwoKICAgICAgICAgICAgLy8gQ29udmVydCB0byBKU09OCiAgICAgICAgICAgIHZhciB3b3JrZmxvd0pTT04gPSAie1widGFza19yb3V0aW5nXCI6IiArIHdvcmtmbG93Q29uZmlndXJhdGlvbi5Ub1N0cmluZygpICsgIn0iOwoKICAgICAgICAgICAgLy8gQ2FsbCBSRVNUIEFQSQogICAgICAgICAgICByZXR1cm4gX2NsaWVudC5BZGRXb3JrZmxvdygKICAgICAgICAgICAgICAgIHdvcmtzcGFjZVNpZCwKICAgICAgICAgICAgICAgICJUZWNoIFN1cHBvcnQiLAogICAgICAgICAgICAgICAgd29ya2Zsb3dKU09OLAogICAgICAgICAgICAgICAgc3RyaW5nLkZvcm1hdCgiezB9L2NhbGxiYWNrL2Fzc2lnbm1lbnQiLCBob3N0VXJsKSwKICAgICAgICAgICAgICAgIHN0cmluZy5Gb3JtYXQoInswfS9jYWxsYmFjay9hc3NpZ25tZW50IiwgaG9zdFVybCksCiAgICAgICAgICAgICAgICAxNSk7CiAgICAgICAgfQoKICAgICAgICBwcml2YXRlIEFjdGl2aXR5IEdldEFjdGl2aXR5QnlGcmllbmRseU5hbWUoc3RyaW5nIHdvcmtzcGFjZVNpZCwgc3RyaW5nIGZyaWVuZGx5TmFtZSkKICAgICAgICB7CiAgICAgICAgICAgIHZhciBhY3Rpdml0eVJlc3VsdCA9IF9jbGllbnQuTGlzdEFjdGl2aXRpZXMod29ya3NwYWNlU2lkKTsKICAgICAgICAgICAgcmV0dXJuIGFjdGl2aXR5UmVzdWx0LkFjdGl2aXRpZXMuRmlyc3QoYSA9PiBhLkZyaWVuZGx5TmFtZSA9PSBmcmllbmRseU5hbWUpOwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSBXb3Jrc3BhY2UgR2V0V29ya3NwYWNlQnlGcmllbmRseU5hbWUoc3RyaW5nIGZyaWVuZGx5TmFtZSkKICAgICAgICB7CiAgICAgICAgICAgIHZhciB3b3Jrc3BhY2VSZXN1bHQgPSBfY2xpZW50Lkxpc3RXb3Jrc3BhY2VzKCk7CiAgICAgICAgICAgIHJldHVybiB3b3Jrc3BhY2VSZXN1bHQuV29ya3NwYWNlcy5GaXJzdE9yRGVmYXVsdCh3ID0+IHcuRnJpZW5kbHlOYW1lID09IGZyaWVuZGx5TmFtZSk7CiAgICAgICAgfQogICAgfQp9</textarea>
+<textarea class="saurus-file" data-file="TaskRouter.Web/Controllers/CallController.cs" data-mode="csharp">77u/dXNpbmcgU3lzdGVtLldlYi5NdmM7CnVzaW5nIFRhc2tSb3V0ZXIuV2ViLkluZnJhc3RydWN0dXJlOwp1c2luZyBUYXNrUm91dGVyLldlYi5Nb2RlbHM7CnVzaW5nIFRhc2tSb3V0ZXIuV2ViLlNlcnZpY2VzOwp1c2luZyBUd2lsaW8uVHdpTUw7CnVzaW5nIFR3aWxpby5Ud2lNTC5NdmM7CgpuYW1lc3BhY2UgVGFza1JvdXRlci5XZWIuQ29udHJvbGxlcnMKewogICAgcHVibGljIGNsYXNzIENhbGxDb250cm9sbGVyIDogVHdpbGlvQ29udHJvbGxlcgogICAgewogICAgICAgIHByaXZhdGUgcmVhZG9ubHkgSU1pc3NlZENhbGxzU2VydmljZSBfc2VydmljZTsKCiAgICAgICAgcHVibGljIENhbGxDb250cm9sbGVyKCkKICAgICAgICB7CiAgICAgICAgICAgIF9zZXJ2aWNlID0gbmV3IE1pc3NlZENhbGxzU2VydmljZShuZXcgVGFza1JvdXRlckRiQ29udGV4dCgpKTsKICAgICAgICB9CgogICAgICAgIHB1YmxpYyBDYWxsQ29udHJvbGxlcihJTWlzc2VkQ2FsbHNTZXJ2aWNlIHNlcnZpY2UpCiAgICAgICAgewogICAgICAgICAgICBfc2VydmljZSA9IHNlcnZpY2U7CiAgICAgICAgfQoKICAgICAgICBbSHR0cFBvc3RdCiAgICAgICAgcHVibGljIEFjdGlvblJlc3VsdCBJbmNvbWluZygpCiAgICAgICAgewogICAgICAgICAgICB2YXIgcmVzcG9uc2UgPSBuZXcgVHdpbGlvUmVzcG9uc2UoKTsKICAgICAgICAgICAgcmVzcG9uc2UKICAgICAgICAgICAgICAgIC5CZWdpbkdhdGhlcihuZXcgeyBudW1EaWdpdHMgPSAxLCBhY3Rpb24gPSAiL2NhbGwvZW5xdWV1ZSIsIG1ldGhvZCA9ICJQT1NUIiB9KQogICAgICAgICAgICAgICAgLlNheSgiRm9yIFByb2dyYW1tYWJsZSBTTVMsIHByZXNzIG9uZS4gRm9yIFZvaWNlLCBwcmVzcyBhbnkgb3RoZXIga2V5LiIpCiAgICAgICAgICAgICAgICAuRW5kR2F0aGVyKCk7CgogICAgICAgICAgICByZXR1cm4gVHdpTUwocmVzcG9uc2UpOwogICAgICAgIH0KCiAgICAgICAgW0h0dHBQb3N0XQogICAgICAgIHB1YmxpYyBBY3Rpb25SZXN1bHQgRW5xdWV1ZShzdHJpbmcgZGlnaXRzKQogICAgICAgIHsKICAgICAgICAgICAgdmFyIHNlbGVjdGVkUHJvZHVjdCA9IGRpZ2l0cyA9PSAiMSIgPyAiUHJvZ3JhbW1hYmxlU01TIiA6ICJQcm9ncmFtbWFibGVWb2ljZSI7CgogICAgICAgICAgICB2YXIgcmVzcG9uc2UgPSBuZXcgVHdpbGlvUmVzcG9uc2UoKTsKICAgICAgICAgICAgcmVzcG9uc2UuRW5xdWV1ZVRhc2soCiAgICAgICAgICAgICAgICBuZXcgeyB3b3JrZmxvd1NpZCA9IFNpbmdsZXRvbi5JbnN0YW5jZS5Xb3JrZmxvd1NpZCB9LAogICAgICAgICAgICAgICAgbmV3IFRhc2soIntcInNlbGVjdGVkX3Byb2R1Y3RcIjpcIiIgKyBzZWxlY3RlZFByb2R1Y3QgKyAiXCJ9IikpOwoKICAgICAgICAgICAgcmV0dXJuIFR3aU1MKHJlc3BvbnNlKTsKICAgICAgICB9CgoKICAgIH0KfQ==</textarea>
+<textarea class="saurus-file" data-file="TaskRouter.Web/Controllers/CallbackController.cs" data-mode="csharp">77u/dXNpbmcgTmV3dG9uc29mdC5Kc29uOwp1c2luZyBTeXN0ZW07CnVzaW5nIFN5c3RlbS5MaW5xOwp1c2luZyBTeXN0ZW0uVGhyZWFkaW5nLlRhc2tzOwp1c2luZyBTeXN0ZW0uV2ViLk12YzsKdXNpbmcgVGFza1JvdXRlci5XZWIuSW5mcmFzdHJ1Y3R1cmU7CnVzaW5nIFRhc2tSb3V0ZXIuV2ViLk1vZGVsczsKdXNpbmcgVGFza1JvdXRlci5XZWIuU2VydmljZXM7CgpuYW1lc3BhY2UgVGFza1JvdXRlci5XZWIuQ29udHJvbGxlcnMKewogICAgcHVibGljIGNsYXNzIENhbGxiYWNrQ29udHJvbGxlciA6IENvbnRyb2xsZXIKICAgIHsKICAgICAgICBwcml2YXRlIHJlYWRvbmx5IElNaXNzZWRDYWxsc1NlcnZpY2UgX3NlcnZpY2U7CiAgICAgICAgcHJpdmF0ZSByZWFkb25seSBUd2lsaW8uVHdpbGlvUmVzdENsaWVudCBfY2xpZW50OwoKICAgICAgICBwdWJsaWMgQ2FsbGJhY2tDb250cm9sbGVyKCkKICAgICAgICB7CiAgICAgICAgICAgIF9zZXJ2aWNlID0gbmV3IE1pc3NlZENhbGxzU2VydmljZShuZXcgVGFza1JvdXRlckRiQ29udGV4dCgpKTsKICAgICAgICAgICAgX2NsaWVudCA9IG5ldyBUd2lsaW8uVHdpbGlvUmVzdENsaWVudChDb25maWcuQWNjb3VudFNJRCwgQ29uZmlnLkF1dGhUb2tlbik7CiAgICAgICAgfQoKICAgICAgICBwdWJsaWMgQ2FsbGJhY2tDb250cm9sbGVyKElNaXNzZWRDYWxsc1NlcnZpY2Ugc2VydmljZSwgVHdpbGlvLlR3aWxpb1Jlc3RDbGllbnQgY2xpZW50KQogICAgICAgIHsKICAgICAgICAgICAgX3NlcnZpY2UgPSBzZXJ2aWNlOwogICAgICAgICAgICBfY2xpZW50ID0gY2xpZW50OwogICAgICAgIH0KCiAgICAgICAgW0h0dHBQb3N0XQogICAgICAgIHB1YmxpYyBBY3Rpb25SZXN1bHQgQXNzaWdubWVudCgpCiAgICAgICAgewogICAgICAgICAgICB2YXIgcmVzcG9uc2UgPSBuZXcKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgaW5zdHJ1Y3Rpb24gPSAiZGVxdWV1ZSIsCiAgICAgICAgICAgICAgICBwb3N0X3dvcmtfYWN0aXZpdHlfc2lkID0gU2luZ2xldG9uLkluc3RhbmNlLlBvc3RXb3JrQWN0aXZpdHlTaWQKICAgICAgICAgICAgfTsKCiAgICAgICAgICAgIHJldHVybiBuZXcgSnNvblJlc3VsdCgpIHsgRGF0YSA9IHJlc3BvbnNlIH07CiAgICAgICAgfQoKICAgICAgICBbSHR0cFBvc3RdCiAgICAgICAgcHVibGljIGFzeW5jIFRhc2s8QWN0aW9uUmVzdWx0PiBFdmVudHMoCiAgICAgICAgICAgIHN0cmluZyBldmVudFR5cGUsIHN0cmluZyB0YXNrQXR0cmlidXRlcywgc3RyaW5nIHdvcmtlclNpZCwgc3RyaW5nIHdvcmtlckFjdGl2aXR5TmFtZSwgc3RyaW5nIHdvcmtlckF0dHJpYnV0ZXMpCiAgICAgICAgewogICAgICAgICAgICBpZiAoSXNFdmVudFRpbWVvdXRPckNhbmNlbGVkKGV2ZW50VHlwZSkpCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgIGF3YWl0IENyZWF0ZU1pc3NlZENhbGxBbmRSZWRpcmVjdFRvVm9pY2VNYWlsKHRhc2tBdHRyaWJ1dGVzKTsKICAgICAgICAgICAgfQoKICAgICAgICAgICAgaWYgKEhhc1dvcmtlckNoYW5nZWRUb09mZmxpbmUoZXZlbnRUeXBlLCB3b3JrZXJBY3Rpdml0eU5hbWUpKQogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBTZW5kTWVzc2FnZVRvV29ya2VyKHdvcmtlclNpZCwgd29ya2VyQXR0cmlidXRlcyk7CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIHJldHVybiBuZXcgRW1wdHlSZXN1bHQoKTsKICAgICAgICB9CgoKICAgICAgICBwcml2YXRlIGJvb2wgSXNFdmVudFRpbWVvdXRPckNhbmNlbGVkKHN0cmluZyBldmVudFR5cGUpCiAgICAgICAgewogICAgICAgICAgICB2YXIgZGVzaXJlZEV2ZW50cyA9IG5ldyBzdHJpbmdbXSB7ICJ3b3JrZmxvdy50aW1lb3V0IiwgInRhc2suY2FuY2VsZWQiIH07CiAgICAgICAgICAgIHJldHVybiBkZXNpcmVkRXZlbnRzLkFueShlID0+IGUgPT0gZXZlbnRUeXBlKTsKICAgICAgICB9CgogICAgICAgIHByaXZhdGUgYm9vbCBIYXNXb3JrZXJDaGFuZ2VkVG9PZmZsaW5lKHN0cmluZyBldmVudFR5cGUsIHN0cmluZyB3b3JrZXJBY3Rpdml0eU5hbWUpCiAgICAgICAgewogICAgICAgICAgICByZXR1cm4gZXZlbnRUeXBlID09ICJ3b3JrZXIuYWN0aXZpdHkudXBkYXRlIiAmJiB3b3JrZXJBY3Rpdml0eU5hbWUgPT0gIk9mZmxpbmUiOwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSBhc3luYyBUYXNrIENyZWF0ZU1pc3NlZENhbGxBbmRSZWRpcmVjdFRvVm9pY2VNYWlsKHN0cmluZyB0YXNrQXR0cmlidXRlcykKICAgICAgICB7CiAgICAgICAgICAgIGR5bmFtaWMgYXR0cmlidXRlcyA9IEpzb25Db252ZXJ0LkRlc2VyaWFsaXplT2JqZWN0KHRhc2tBdHRyaWJ1dGVzKTsKICAgICAgICAgICAgdmFyIG1pc3NlZENhbGwgPSBuZXcgTWlzc2VkQ2FsbAogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBQaG9uZU51bWJlciA9IGF0dHJpYnV0ZXMuZnJvbSwKICAgICAgICAgICAgICAgIFByb2R1Y3QgPSBhdHRyaWJ1dGVzLnNlbGVjdGVkX3Byb2R1Y3QsCiAgICAgICAgICAgICAgICBDcmVhdGVkQXQgPSBEYXRlVGltZS5Ob3cKICAgICAgICAgICAgfTsKCiAgICAgICAgICAgIGF3YWl0IF9zZXJ2aWNlLkNyZWF0ZUFzeW5jKG1pc3NlZENhbGwpOwogICAgICAgICAgICBzdHJpbmcgdm9pY2VTaWQgPSBhdHRyaWJ1dGVzLmNhbGxfc2lkOwogICAgICAgICAgICBWb2ljZU1haWwodm9pY2VTaWQpOwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSB2b2lkIFNlbmRNZXNzYWdlVG9Xb3JrZXIoc3RyaW5nIHdvcmtlclNpZCwgc3RyaW5nIHdvcmtlckF0dHJpYnV0ZXMpCiAgICAgICAgewogICAgICAgICAgICBjb25zdCBzdHJpbmcgbWVzc2FnZSA9ICJZb3Ugd2VudCBvZmZsaW5lLiBUbyBtYWtlIHlvdXJzZWxmIGF2YWlsYWJsZSByZXBseSB3aXRoIFwib25cIiI7CgogICAgICAgICAgICBkeW5hbWljIGF0dHJpYnV0ZXMgPSBKc29uQ29udmVydC5EZXNlcmlhbGl6ZU9iamVjdCh3b3JrZXJBdHRyaWJ1dGVzKTsKICAgICAgICAgICAgc3RyaW5nIHdvcmtlclBob25lTnVtYmVyID0gYXR0cmlidXRlcy5jb250YWN0X3VyaTsKCiAgICAgICAgICAgIF9jbGllbnQuU2VuZE1lc3NhZ2UoQ29uZmlnLlR3aWxpb051bWJlciwgd29ya2VyUGhvbmVOdW1iZXIsIG1lc3NhZ2UpOwogICAgICAgIH0KCiAgICAgICAgcHJpdmF0ZSB2b2lkIFZvaWNlTWFpbChzdHJpbmcgY2FsbFNpZCkKICAgICAgICB7CiAgICAgICAgICAgIHZhciBtc2cgPSAiU29ycnksIEFsbCBhZ2VudHMgYXJlIGJ1c3kuIFBsZWFzZSBsZWF2ZSBhIG1lc3NhZ2UuIFdlIHdpbGwgY2FsbCB5b3UgYXMgc29vbiBhcyBwb3NzaWJsZSI7CiAgICAgICAgICAgIHZhciByb3V0ZVVybCA9ICJodHRwOi8vdHdpbWxldHMuY29tL3ZvaWNlbWFpbD9FbWFpbD0iICsgQ29uZmlnLlZvaWNlTWFpbCArICImTWVzc2FnZT0iICsgVXJsLkVuY29kZShtc2cpOwogICAgICAgICAgICB2YXIgY2xpZW50ID0gbmV3IFR3aWxpby5Ud2lsaW9SZXN0Q2xpZW50KENvbmZpZy5BY2NvdW50U0lELCBDb25maWcuQXV0aFRva2VuKTsKICAgICAgICAgICAgY2xpZW50LlJlZGlyZWN0Q2FsbChjYWxsU2lkLCBuZXcgVHdpbGlvLkNhbGxPcHRpb25zIHsgVXJsID0gcm91dGVVcmwgfSk7CiAgICAgICAgfQogICAgfQp9</textarea>
+<textarea class="saurus-file" data-file="TaskRouter.Web/Controllers/MessageController.cs" data-mode="csharp">77u/dXNpbmcgU3lzdGVtOwp1c2luZyBTeXN0ZW0uV2ViLk12YzsKdXNpbmcgVGFza1JvdXRlci5XZWIuSW5mcmFzdHJ1Y3R1cmU7CnVzaW5nIFR3aWxpby5UYXNrUm91dGVyOwp1c2luZyBUd2lsaW8uVHdpTUw7CnVzaW5nIFR3aWxpby5Ud2lNTC5NdmM7CgpuYW1lc3BhY2UgVGFza1JvdXRlci5XZWIuQ29udHJvbGxlcnMKewogICAgcHVibGljIGNsYXNzIE1lc3NhZ2VDb250cm9sbGVyIDogVHdpbGlvQ29udHJvbGxlcgogICAgewoKICAgICAgICBwcml2YXRlIHJlYWRvbmx5IFRhc2tSb3V0ZXJDbGllbnQgX2NsaWVudDsKICAgICAgICBwcml2YXRlIGNvbnN0IHN0cmluZyBPbiA9ICJvbiI7CiAgICAgICAgcHJpdmF0ZSBjb25zdCBzdHJpbmcgT2ZmID0gIm9mZiI7CgogICAgICAgIHB1YmxpYyBNZXNzYWdlQ29udHJvbGxlcigpCiAgICAgICAgewogICAgICAgICAgICBfY2xpZW50ID0gbmV3IFRhc2tSb3V0ZXJDbGllbnQoQ29uZmlnLkFjY291bnRTSUQsIENvbmZpZy5BdXRoVG9rZW4pOwogICAgICAgIH0KCiAgICAgICAgcHVibGljIE1lc3NhZ2VDb250cm9sbGVyKFRhc2tSb3V0ZXJDbGllbnQgY2xpZW50KQogICAgICAgIHsKICAgICAgICAgICAgX2NsaWVudCA9IGNsaWVudDsKICAgICAgICB9CgogICAgICAgIFtIdHRwUG9zdF0KICAgICAgICBwdWJsaWMgQWN0aW9uUmVzdWx0IEluY29taW5nKHN0cmluZyBmcm9tLCBzdHJpbmcgYm9keSkKICAgICAgICB7CiAgICAgICAgICAgIHZhciB3b3Jrc3BhY2VTaWQgPSBTaW5nbGV0b24uSW5zdGFuY2UuV29ya3NwYWNlU2lkOwogICAgICAgICAgICB2YXIgd29ya2VyU2lkID0gU2luZ2xldG9uLkluc3RhbmNlLldvcmtlcnNbZnJvbV07CiAgICAgICAgICAgIHZhciBpZGxlQWN0aXZpdHlTaWQgPSBTaW5nbGV0b24uSW5zdGFuY2UuSWRsZUFjdGl2aXR5U2lkOwogICAgICAgICAgICB2YXIgb2ZmbGluZUFjdGl2aXR5U2lkID0gU2luZ2xldG9uLkluc3RhbmNlLk9mZmxpbmVBY3Rpdml0eVNpZDsKICAgICAgICAgICAgdmFyIG1lc3NhZ2UgPSAiVW5yZWNvZ25pemVkIGNvbW1hbmQsIHJlcGx5IHdpdGggXCJvblwiIHRvIGFjdGl2YXRlIHlvdXIgd29ya2VyIG9yIFwib2ZmXCIgb3RoZXJ3aXNlIjsKCiAgICAgICAgICAgIHZhciB3b3JrZXIgPSBfY2xpZW50LkdldFdvcmtlcih3b3Jrc3BhY2VTaWQsIHdvcmtlclNpZCk7CgogICAgICAgICAgICBpZiAoYm9keS5FcXVhbHMoT24sIFN0cmluZ0NvbXBhcmlzb24uSW52YXJpYW50Q3VsdHVyZUlnbm9yZUNhc2UpKQogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBfY2xpZW50LlVwZGF0ZVdvcmtlcih3b3Jrc3BhY2VTaWQsIHdvcmtlclNpZCwgaWRsZUFjdGl2aXR5U2lkLCB3b3JrZXIuQXR0cmlidXRlcywgd29ya2VyLkZyaWVuZGx5TmFtZSk7CiAgICAgICAgICAgICAgICBtZXNzYWdlID0gIllvdXIgd29ya2VyIGlzIG9ubGluZSI7CiAgICAgICAgICAgIH0KCiAgICAgICAgICAgIGlmIChib2R5LkVxdWFscyhPZmYsIFN0cmluZ0NvbXBhcmlzb24uSW52YXJpYW50Q3VsdHVyZUlnbm9yZUNhc2UpKQogICAgICAgICAgICB7CiAgICAgICAgICAgICAgICBfY2xpZW50LlVwZGF0ZVdvcmtlcih3b3Jrc3BhY2VTaWQsIHdvcmtlclNpZCwgb2ZmbGluZUFjdGl2aXR5U2lkLCB3b3JrZXIuQXR0cmlidXRlcywgd29ya2VyLkZyaWVuZGx5TmFtZSk7CiAgICAgICAgICAgICAgICBtZXNzYWdlID0gIllvdXIgd29ya2VyIGlzIG9mZmxpbmUiOwogICAgICAgICAgICB9CgogICAgICAgICAgICByZXR1cm4gVHdpTUwobmV3IFR3aWxpb1Jlc3BvbnNlKCkuTWVzc2FnZShtZXNzYWdlKSk7CiAgICAgICAgfQogICAgfQp9</textarea>
+</div>
+</div><div class="saurus-overview"><ul></ul></div></div><div class="saurus-code"><div class="file-path"><span class="crumb-container"></span><i class="fa fa-fw fa-folder"></i></div><div class="saurus-editor"></div></div><div class="saurus-explorer"><div class="saurus-file-list"></div><a href="https://github.com/TwilioDevEd/task-router-csharp" target="_blank" class="explorer-get-code"> <i class="fa fa-lg fa-github-square"> </i>View Code on GitHub</a></div></div></div></div><script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script><script src="ace/ace.js"></script><script src="ace/theme-monokai.js"></script><script src="viewsaurus.js"></script></body></html>
