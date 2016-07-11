@@ -38,9 +38,10 @@ This project is built using [ASP.NET MVC](http://www.asp.net/mvc) Framework.
 
 1. Check it out at [http://localhost:8080](http://localhost:8080).
 
-1. Expose application to the wider internet. To [start using
-   ngrok](https://www.twilio.com/blog/2015/09/6-awesome-reasons-to-use-ngrok-when-testing-webhooks.html)
-   on our project you'll have to execute the following line in the command
+1. Expose application to the wider internet.
+
+   In order to [start using ngrok](https://www.twilio.com/blog/2015/09/6-awesome-reasons-to-use-ngrok-when-testing-webhooks.html)
+   in our project you'll have to execute the following line in the command
    prompt.
 
    ```shell
@@ -76,12 +77,18 @@ This project is built using [ASP.NET MVC](http://www.asp.net/mvc) Framework.
    ```
 
 1. Reply with 1.
+
 1. The specified phone for the Programmable SMS agent's phone will be called.
+
 1. If the Programmable SMS agent's phone is not answered in 30 seconds then the
    Programmable Voice agent's phone will be called.
+
 1. In case the second agent doesn't answer the call, it will be logged as a
-   missed call. You can see all missed calls in the main page of the running
+   missed call.
+
+   You can see all missed calls in the main page of the running
    server at [http://localhost:8080](http://localhost:8080).
+
 1. Repeat the process but enter any key different to __1__ to choose Voice.
 
 [twilio-phone-number]: https://www.twilio.com/console/phone-numbers/incoming
