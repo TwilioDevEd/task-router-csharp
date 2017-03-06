@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
@@ -22,7 +23,7 @@ namespace TaskRouter.Web.Controllers
         public async Task<ActionResult> Index()
         {
             var missedCalls = await _service.FindAllAsync();
-            return View(missedCalls);
+            return View(missedCalls.ToList());
         }
     }
 }

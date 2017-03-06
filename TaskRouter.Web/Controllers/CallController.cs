@@ -3,11 +3,10 @@ using TaskRouter.Web.Infrastructure;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
 using Twilio.TwiML;
-using Twilio.TwiML.Mvc;
 
 namespace TaskRouter.Web.Controllers
 {
-    public class CallController : TwilioController
+    public class CallController : Controller
     {
         private readonly IMissedCallsService _service;
 
@@ -24,26 +23,25 @@ namespace TaskRouter.Web.Controllers
         [HttpPost]
         public ActionResult Incoming()
         {
-            var response = new TwilioResponse();
-            response
-                .BeginGather(new { numDigits = 1, action = "/call/enqueue", method = "POST" })
-                .Say("For Programmable SMS, press one. For Voice, press any other key.")
-                .EndGather();
+            var response = new VoiceResponse();
+            var gather = new Gather(numDigits: 1, action: "/call/enqueue", method: "POST");
+            gather.Say("For Programmable SMS, press one. For Voice, press any other key.");
+            response.Gather(gather);
 
-            return TwiML(response);
+            return Content(response.ToString(), "text/xml");
         }
 
         [HttpPost]
         public ActionResult Enqueue(string digits)
         {
             var selectedProduct = digits == "1" ? "ProgrammableSMS" : "ProgrammableVoice";
+            var response = new VoiceResponse();
 
-            var response = new TwilioResponse();
-            response.EnqueueTask(
-                new { workflowSid = Singleton.Instance.WorkflowSid },
-                new Task("{\"selected_product\":\"" + selectedProduct + "\"}"));
+            response.Enqueue(
+                selectedProduct,
+                workflowSid: Singleton.Instance.WorkflowSid);
 
-            return TwiML(response);
+            return Content(response.ToString(), "text/xml");
         }
 
 
