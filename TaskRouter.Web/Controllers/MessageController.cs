@@ -2,12 +2,13 @@
 using System.Web.Mvc;
 using TaskRouter.Web.Infrastructure;
 using Twilio;
+using Twilio.AspNet.Mvc;
 using Twilio.Rest.Taskrouter.V1.Workspace;
 using Twilio.TwiML;
 
 namespace TaskRouter.Web.Controllers
 {
-    public class MessageController : Controller
+    public class MessageController : TwilioController
     {
         private const string On = "on";
         private const string Off = "off";
@@ -54,7 +55,7 @@ namespace TaskRouter.Web.Controllers
                 message = "Your worker is offline";
             }
 
-            return Content(new MessagingResponse().Message(message).ToString(), "text/xml");
+            return TwiML(new MessagingResponse().Message(message));
         }
     }
 }

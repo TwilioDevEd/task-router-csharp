@@ -3,10 +3,11 @@ using System.Threading.Tasks;
 using System.Web.Mvc;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
+using Twilio.AspNet.Mvc;
 
 namespace TaskRouter.Web.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : TwilioController
     {
         private readonly IMissedCallsService _service;
 

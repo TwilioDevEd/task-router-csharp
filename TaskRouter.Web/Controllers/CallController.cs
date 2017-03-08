@@ -2,11 +2,12 @@
 using TaskRouter.Web.Infrastructure;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
+using Twilio.AspNet.Mvc;
 using Twilio.TwiML;
 
 namespace TaskRouter.Web.Controllers
 {
-    public class CallController : Controller
+    public class CallController : TwilioController
     {
         private readonly IMissedCallsService _service;
 
@@ -28,7 +29,7 @@ namespace TaskRouter.Web.Controllers
             gather.Say("For Programmable SMS, press one. For Voice, press any other key.");
             response.Gather(gather);
 
-            return Content(response.ToString(), "text/xml");
+            return TwiML(response);
         }
 
         [HttpPost]
@@ -41,7 +42,7 @@ namespace TaskRouter.Web.Controllers
                 selectedProduct,
                 workflowSid: Singleton.Instance.WorkflowSid);
 
-            return Content(response.ToString(), "text/xml");
+            return TwiML(response);
         }
 
 

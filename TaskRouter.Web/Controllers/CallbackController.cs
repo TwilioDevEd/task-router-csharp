@@ -7,12 +7,13 @@ using TaskRouter.Web.Infrastructure;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
 using Twilio;
+using Twilio.AspNet.Mvc;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
 namespace TaskRouter.Web.Controllers
 {
-    public class CallbackController : Controller
+    public class CallbackController : TwilioController
     {
         private readonly IMissedCallsService _service;
 

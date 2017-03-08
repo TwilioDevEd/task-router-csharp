@@ -2,11 +2,11 @@
 using Moq;
 using NUnit.Framework;
 using System.Xml.XPath;
-using FluentMvcTesting.Extensions;
 using TaskRouter.Web.Controllers;
 using TaskRouter.Web.Infrastructure;
 using TestStack.FluentMVCTesting;
 using Twilio.Rest.Taskrouter.V1.Workspace;
+using TaskRouter.Web.Tests.Extensions;
 
 namespace TaskRouter.Web.Tests.Controllers
 {
@@ -38,6 +38,7 @@ namespace TaskRouter.Web.Tests.Controllers
         {
             Singleton.Instance.Workers["worker-phone-number"] = "WKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
         }
+
         [TestCase("on", "online")]
         [TestCase("off", "offline")]
         [TestCase("invalid-input", "Unrecognized command")]
@@ -46,7 +47,7 @@ namespace TaskRouter.Web.Tests.Controllers
             var controllerMock = mockMessageController();
             var controller = controllerMock.Object;
             controller.WithCallTo(c => c.Incoming("worker-phone-number", body))
-                .ShouldReturnXmlResult(data =>
+                .ShouldReturnTwiMLResult(data =>
                  {
                      StringAssert.Contains(
                          expectedMessage, data.XPathSelectElement("Response/Message").Value);
