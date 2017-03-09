@@ -4,6 +4,11 @@ namespace TaskRouter.Web.Infrastructure
 {
     public class Config
     {
+        public static string ENV 
+        {
+            get { return WebConfigurationManager.AppSettings["ENV"]; }
+        }
+
         public static string AccountSID
         {
             get { return WebConfigurationManager.AppSettings["AccountSID"]; }

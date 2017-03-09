@@ -1,34 +1,51 @@
-﻿using Moq;
+﻿using System.Web.Helpers;
+using Moq;
 using NUnit.Framework;
 using System.Xml.XPath;
 using TaskRouter.Web.Controllers;
 using TaskRouter.Web.Infrastructure;
-using TaskRouter.Web.Tests.Extensions;
 using TestStack.FluentMVCTesting;
-using Twilio.TaskRouter;
+using Twilio.Rest.Taskrouter.V1.Workspace;
+using TaskRouter.Web.Tests.Extensions;
 
 namespace TaskRouter.Web.Tests.Controllers
 {
     public class MessageControllerTest
     {
-        private Mock<TaskRouterClient> _mockClient;
+
+        Mock<MessageController> mockMessageController()
+        {
+            var controller = new Mock<MessageController>() { CallBase = true };
+
+            controller
+                .Setup(c => c.FetchWorker(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(WorkerResource.FromJson(Json.Encode(new {Sid = "WKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" })));
+
+            controller
+                .Setup(c => c.UpdateWorker(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()))
+                .Returns(WorkerResource.FromJson(Json.Encode(new { Sid = "WKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" })));
+
+            return controller;
+        }
 
         [SetUp]
         public void SetUp()
         {
-            _mockClient = new Mock<TaskRouterClient>(string.Empty, string.Empty);
-            _mockClient.Setup(c => c.GetWorker(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(new Worker());
-
             Singleton.Instance.Workers["worker-phone-number"] = "WKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
         }
+
         [TestCase("on", "online")]
         [TestCase("off", "offline")]
         [TestCase("invalid-input", "Unrecognized command")]
         public void Incoming_RespondsWithMessage(string body, string expectedMessage)
         {
-
-            var controller = new MessageController(_mockClient.Object);
+            var controllerMock = mockMessageController();
+            var controller = controllerMock.Object;
             controller.WithCallTo(c => c.Incoming("worker-phone-number", body))
                 .ShouldReturnTwiMLResult(data =>
                  {
@@ -42,10 +59,11 @@ namespace TaskRouter.Web.Tests.Controllers
         [TestCase("invalid-input", 0)]
         public void Incoming_UpdatesWorkerAppropriately(string body, int times)
         {
-            var controller = new MessageController(_mockClient.Object);
+            var controllerMock = mockMessageController();
+            var controller = controllerMock.Object;
             controller.Incoming("worker-phone-number", body);
 
-            _mockClient.Verify(c => c.UpdateWorker(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+            controllerMock.Verify(c => c.UpdateWorker(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Exactly(times));
         }
     }

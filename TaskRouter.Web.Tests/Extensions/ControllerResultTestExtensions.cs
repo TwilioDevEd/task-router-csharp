@@ -2,7 +2,7 @@
 using System.Web.Mvc;
 using System.Xml.Linq;
 using TestStack.FluentMVCTesting;
-using Twilio.TwiML.Mvc;
+using Twilio.AspNet.Mvc;
 
 namespace TaskRouter.Web.Tests.Extensions
 {
@@ -19,10 +19,11 @@ namespace TaskRouter.Web.Tests.Extensions
             this ControllerResultTest<T> controllerResultTest,
             Action<XDocument> assertion) where T : Controller
         {
-            controllerResultTest.ValidateActionReturnType<TwiMLResult>();
+            controllerResultTest.ValidateActionReturnType<ActionResult>();
 
             var twiMLResult = (TwiMLResult)controllerResultTest.ActionResult;
-            var xdocument = twiMLResult.Data() as XDocument;
+            var xdocument = twiMLResult.Data as XDocument;
+
             assertion(xdocument);
 
             return (TwiMLResult)controllerResultTest.ActionResult;

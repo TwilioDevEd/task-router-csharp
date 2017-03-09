@@ -1,27 +1,35 @@
 ﻿using System;
 using System.Web.Mvc;
 using TaskRouter.Web.Infrastructure;
-using Twilio.TaskRouter;
+using Twilio;
+using Twilio.AspNet.Mvc;
+using Twilio.Rest.Taskrouter.V1.Workspace;
 using Twilio.TwiML;
-using Twilio.TwiML.Mvc;
 
 namespace TaskRouter.Web.Controllers
 {
     public class MessageController : TwilioController
     {
-
-        private readonly TaskRouterClient _client;
         private const string On = "on";
         private const string Off = "off";
 
         public MessageController()
         {
-            _client = new TaskRouterClient(Config.AccountSID, Config.AuthToken);
+            if (Config.ENV != "test")
+            {
+                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
+            }
         }
 
-        public MessageController(TaskRouterClient client)
+        public virtual WorkerResource FetchWorker(string workspaceSid, string workerSid)
         {
-            _client = client;
+            return WorkerResource.Fetch(workspaceSid, workerSid);
+        }
+
+        public virtual WorkerResource UpdateWorker(string pathWorkspaceSid, string pathSid, string activitySid = null,
+            string attributes = null, string friendlyName = null)
+        {
+            return WorkerResource.Update(pathWorkspaceSid, pathSid, activitySid, attributes, friendlyName);
         }
 
         [HttpPost]
@@ -33,21 +41,21 @@ namespace TaskRouter.Web.Controllers
             var offlineActivitySid = Singleton.Instance.OfflineActivitySid;
             var message = "Unrecognized command, reply with \"on\" to activate your worker or \"off\" otherwise";
 
-            var worker = _client.GetWorker(workspaceSid, workerSid);
+            var worker = FetchWorker(workspaceSid, workerSid);
 
             if (body.Equals(On, StringComparison.InvariantCultureIgnoreCase))
             {
-                _client.UpdateWorker(workspaceSid, workerSid, idleActivitySid, worker.Attributes, worker.FriendlyName);
+                UpdateWorker(workspaceSid, workerSid, idleActivitySid, worker.Attributes, worker.FriendlyName);
                 message = "Your worker is online";
             }
 
             if (body.Equals(Off, StringComparison.InvariantCultureIgnoreCase))
             {
-                _client.UpdateWorker(workspaceSid, workerSid, offlineActivitySid, worker.Attributes, worker.FriendlyName);
+                UpdateWorker(workspaceSid, workerSid, offlineActivitySid, worker.Attributes, worker.FriendlyName);
                 message = "Your worker is offline";
             }
 
-            return TwiML(new TwilioResponse().Message(message));
+            return TwiML(new MessagingResponse().Message(message));
         }
     }
 }
