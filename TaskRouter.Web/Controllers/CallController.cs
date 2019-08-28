@@ -1,9 +1,11 @@
-﻿using System.Web.Mvc;
+﻿using System;
+using System.Web.Mvc;
 using TaskRouter.Web.Infrastructure;
 using TaskRouter.Web.Models;
 using TaskRouter.Web.Services;
 using Twilio.AspNet.Mvc;
 using Twilio.TwiML;
+using Twilio.TwiML.Voice;
 
 namespace TaskRouter.Web.Controllers
 {
@@ -25,7 +27,7 @@ namespace TaskRouter.Web.Controllers
         public ActionResult Incoming()
         {
             var response = new VoiceResponse();
-            var gather = new Gather(numDigits: 1, action: "/call/enqueue", method: "POST");
+            var gather = new Gather(numDigits: 1, action: new Uri("/call/enqueue", UriKind.Relative), method: "POST");
             gather.Say("For Programmable SMS, press one. For Voice, press any other key.");
             response.Gather(gather);
 

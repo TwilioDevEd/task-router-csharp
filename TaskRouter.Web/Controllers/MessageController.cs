@@ -36,6 +36,10 @@ namespace TaskRouter.Web.Controllers
         public ActionResult Incoming(string from, string body)
         {
             var workspaceSid = Singleton.Instance.WorkspaceSid;
+            if (!Singleton.Instance.Workers.ContainsKey(from))
+            {
+                return TwiML(new MessagingResponse().Message("Your number is not registered as an agent"));
+            }
             var workerSid = Singleton.Instance.Workers[from];
             var idleActivitySid = Singleton.Instance.IdleActivitySid;
             var offlineActivitySid = Singleton.Instance.OfflineActivitySid;

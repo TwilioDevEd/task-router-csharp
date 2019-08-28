@@ -11,7 +11,7 @@ namespace TaskRouter.Web
 {
     public class WorkspaceConfig
     {
-        private readonly string _hostUrl = Config.HostUrl;
+        private readonly Uri _hostUrl = new Uri(Config.HostUrl);
 
         private const string VoiceQueue = "VoiceQueue";
         private const string SmsQueue = "SMSQueue";
@@ -39,6 +39,11 @@ namespace TaskRouter.Web
             return ActivityResource.Read(workspaceSid, friendlyName).First();
         }
 
+        public virtual ActivityResource CreateActivityWithFriendlyName(string workspaceSid, string friendlyName)
+        {
+            return ActivityResource.Create(workspaceSid, friendlyName);
+        }
+
         public virtual WorkspaceResource GetWorkspaceByFriendlyName(string friendlyName)
         {
             return WorkspaceResource.Read(friendlyName).FirstOrDefault();
@@ -61,12 +66,13 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", $"{_hostUrl}/callback/events");
+            var workspace = DeleteAndCreateWorkspace(
+                "Twilio Workspace", new Uri(_hostUrl, "/callback/events").AbsoluteUri);
             var workspaceSid = workspace.Sid;
 
-            var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Busy");
-            var reservationActivity = GetActivityByFriendlyName(workspaceSid, "Reserved");
-            var idleActivity = GetActivityByFriendlyName(workspaceSid, "Idle");
+            var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Unavailable");
+            var idleActivity = GetActivityByFriendlyName(workspaceSid, "Available");
+            var reservationActivity = CreateActivityWithFriendlyName(workspaceSid, "Reserved");
             var offlineActivity = GetActivityByFriendlyName(workspaceSid, "Offline");
 
             var workers = CreateWorkers(workspaceSid, idleActivity);
@@ -127,7 +133,11 @@ namespace TaskRouter.Web
             string assignmentActivitySid, string reservationActivitySid, string targetWorkers)
         {
             var queue = TaskQueueResource.Create(
-                workspaceSid, friendlyName, assignmentActivitySid, reservationActivitySid);
+                workspaceSid,
+                friendlyName: friendlyName,
+                assignmentActivitySid: assignmentActivitySid,
+                reservationActivitySid: reservationActivitySid
+            );
 
             TaskQueueResource.Update(
                 workspaceSid,
