@@ -11,7 +11,7 @@ namespace TaskRouter.Web
 {
     public class WorkspaceConfig
     {
-        private readonly Uri _hostUrl = new Uri(Config.HostUrl);
+        private readonly Config _config;
 
         private const string VoiceQueue = "VoiceQueue";
         private const string SmsQueue = "SMSQueue";
@@ -22,12 +22,15 @@ namespace TaskRouter.Web
             new WorkspaceConfig().Register();
         }
 
-        public WorkspaceConfig()
+        public WorkspaceConfig():this(new Config())
         {
-            if (Config.ENV != "test")
-            {
-                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
-            }
+        }
+
+        public WorkspaceConfig(Config config)
+        {
+            TwilioClient.Init(config.AccountSID, config.AuthToken);
+            _config = config;
+
         }
 
         public WorkspaceConfig(Type workspaceResource):this()
@@ -67,7 +70,7 @@ namespace TaskRouter.Web
         public void Register()
         {
             var workspace = DeleteAndCreateWorkspace(
-                "Twilio Workspace", new Uri(_hostUrl, "/callback/events").AbsoluteUri);
+                "Twilio Workspace", new Uri(new Uri(_config.HostUrl), "/callback/events").AbsoluteUri);
             var workspaceSid = workspace.Sid;
 
             var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Unavailable");
@@ -105,7 +108,7 @@ namespace TaskRouter.Web
                 {
                     "ProgrammableSMS"
                 },
-                contact_uri = Config.AgentForProgrammableSMS
+                contact_uri = _config.AgentForProgrammableSMS
             };
 
             var bobWorker = CreateWorker(workspaceSid, "Bob", activity.Sid, Json.Encode(attributesForBob));
@@ -116,15 +119,15 @@ namespace TaskRouter.Web
                 {
                     "ProgrammableVoice"
                 },
-                contact_uri = Config.AgentForProgrammableVoice
+                contact_uri = _config.AgentForProgrammableVoice
             };
 
             var alice = CreateWorker(workspaceSid, "Alice", activity.Sid, Json.Encode(attributesForAlice));
 
             return new Dictionary<string, string>
             {
-                { Config.AgentForProgrammableSMS, bobWorker.Sid },
-                { Config.AgentForProgrammableVoice, alice.Sid },
+                { _config.AgentForProgrammableSMS, bobWorker.Sid },
+                { _config.AgentForProgrammableVoice, alice.Sid },
             };
         }
 
@@ -222,8 +225,8 @@ namespace TaskRouter.Web
                 workspaceSid,
                 "Tech Support",
                 Json.Encode(workflowConfiguration),
-                new Uri($"{_hostUrl}/callback/assignment"),
-                new Uri($"{_hostUrl}/callback/assignment"),
+                new Uri($"{_config.HostUrl}/callback/assignment"),
+                new Uri($"{_config.HostUrl}/callback/assignment"),
                 15);
         }
     }

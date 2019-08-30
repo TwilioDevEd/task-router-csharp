@@ -16,15 +16,15 @@ namespace TaskRouter.Web.Controllers
     public class CallbackController : TwilioController
     {
         private readonly IMissedCallsService _service;
+        private readonly Config _config;
 
-        public CallbackController()
+        public CallbackController():this(new Config()) { }
+
+        public CallbackController(Config config)
         {
+            TwilioClient.Init(config.AccountSID, config.AuthToken);
             _service = new MissedCallsService(new TaskRouterDbContext());
-
-            if (Config.ENV != "test")
-            {
-                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
-            }
+            _config = config;
         }
 
         public CallbackController(IMissedCallsService service)
@@ -96,7 +96,7 @@ namespace TaskRouter.Web.Controllers
             string workerPhoneNumber = attributes.contact_uri;
 
             MessageResource.Create(
-                to: new PhoneNumber(Config.TwilioNumber),
+                to: new PhoneNumber(_config.TwilioNumber),
                 from: new PhoneNumber(workerPhoneNumber),
                 body: message
             );
@@ -105,7 +105,7 @@ namespace TaskRouter.Web.Controllers
         private void VoiceMail(string callSid)
         {
             var msg = "Sorry, All agents are busy. Please leave a message. We will call you as soon as possible";
-            var routeUrl = "http://twimlets.com/voicemail?Email=" + Config.VoiceMail + "&Message=" + Url.Encode(msg);
+            var routeUrl = "http://twimlets.com/voicemail?Email=" + _config.VoiceMail + "&Message=" + Url.Encode(msg);
             CallResource.Update(callSid, url: new Uri(routeUrl));
         }
     }

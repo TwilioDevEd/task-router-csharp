@@ -4,42 +4,44 @@ namespace TaskRouter.Web.Infrastructure
 {
     public class Config
     {
-        public static string ENV 
+        public Config() { }
+
+        public virtual string ENV
         {
             get { return WebConfigurationManager.AppSettings["ENV"]; }
         }
 
-        public static string AccountSID
+        public virtual string AccountSID
         {
             get { return WebConfigurationManager.AppSettings["AccountSID"]; }
         }
 
-        public static string AuthToken
+        public virtual string AuthToken
         {
             get { return WebConfigurationManager.AppSettings["AuthToken"]; }
         }
 
-        public static string TwilioNumber
+        public virtual string TwilioNumber
         {
             get { return WebConfigurationManager.AppSettings["TwilioNumber"]; }
         }
 
-        public static string HostUrl
+        public virtual string HostUrl
         {
             get { return WebConfigurationManager.AppSettings["HostUrl"]; }
         }
 
-        public static string VoiceMail
+        public virtual string VoiceMail
         {
             get { return WebConfigurationManager.AppSettings["VoiceMail"]; }
         }
 
-        public static string AgentForProgrammableVoice
+        public virtual string AgentForProgrammableVoice
         {
             get { return WebConfigurationManager.AppSettings["AgentForProgrammableVoice"]; }
         }
 
-        public static string AgentForProgrammableSMS
+        public virtual string AgentForProgrammableSMS
         {
             get { return WebConfigurationManager.AppSettings["AgentForProgrammableSMS"]; }
         }

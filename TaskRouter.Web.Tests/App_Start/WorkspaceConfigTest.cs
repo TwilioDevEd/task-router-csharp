@@ -39,7 +39,14 @@ namespace TaskRouter.Web.Tests.App_Start
         [SetUp]
         public void SetUp()
         {
-            var _workspaceConfig = new Mock<WorkspaceConfig> () { CallBase = true };
+            var _mockConfig = new Mock<Config>();
+            _mockConfig.SetupGet(x => x.AccountSID).Returns("ACXXXX...");
+            _mockConfig.SetupGet(x => x.AuthToken).Returns("auth token");
+            _mockConfig.SetupGet(x => x.HostUrl).Returns("http://example.com");
+            _mockConfig.SetupGet(x => x.AgentForProgrammableSMS).Returns("+1234567890");
+            _mockConfig.SetupGet(x => x.AgentForProgrammableVoice).Returns("+1098765432");
+
+            var _workspaceConfig = new Mock<WorkspaceConfig> (_mockConfig.Object) { CallBase = true };
 
             _workspaceConfig
                 .Setup(w => w.GetActivityByFriendlyName(It.IsAny<string>(), It.IsAny<string>()))
@@ -47,6 +54,15 @@ namespace TaskRouter.Web.Tests.App_Start
                     new {
                             Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
                             friendlyName
+                    })
+                );
+            _workspaceConfig
+                .Setup(w => w.CreateActivityWithFriendlyName(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string wsSid, string friendlyName) => activityFromObject(
+                    new
+                    {
+                        Sid = "WAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                        friendlyName
                     })
                 );
 

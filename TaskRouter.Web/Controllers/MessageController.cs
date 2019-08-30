@@ -13,12 +13,11 @@ namespace TaskRouter.Web.Controllers
         private const string On = "on";
         private const string Off = "off";
 
-        public MessageController()
+        public MessageController() : this(new Config()) { }
+
+        public MessageController(Config config)
         {
-            if (Config.ENV != "test")
-            {
-                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
-            }
+            TwilioClient.Init(config.AccountSID, config.AuthToken);
         }
 
         public virtual WorkerResource FetchWorker(string workspaceSid, string workerSid)

@@ -29,8 +29,7 @@ namespace TaskRouter.Web.Controllers
             var response = new VoiceResponse();
             var gather = new Gather(numDigits: 1, action: new Uri("/call/enqueue", UriKind.Relative), method: "POST");
             gather.Say("For Programmable SMS, press one. For Voice, press any other key.");
-            response.Gather(gather);
-
+            response.Append(gather);
             return TwiML(response);
         }
 
