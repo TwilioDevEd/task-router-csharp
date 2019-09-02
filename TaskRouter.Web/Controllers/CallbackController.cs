@@ -46,11 +46,12 @@ namespace TaskRouter.Web.Controllers
 
         [HttpPost]
         public async Task<ActionResult> Events(
-            string eventType, string taskAttributes, string workerSid, string workerActivityName, string workerAttributes)
+            string eventType, string taskAttributes,  string workerSid,
+            string workerActivityName, string workerAttributes)
         {
             if (IsEventTimeoutOrCanceled(eventType))
             {
-                await CreateMissedCallAndRedirectToVoiceMail(taskAttributes);
+              await CreateMissedCallAndRedirectToVoiceMail(taskAttributes);
             }
 
             if (HasWorkerChangedToOffline(eventType, workerActivityName))
@@ -79,7 +80,7 @@ namespace TaskRouter.Web.Controllers
             var missedCall = new MissedCall
             {
                 PhoneNumber = attributes.from,
-                Product = attributes.selected_product,
+                Product = attributes.selectedd_product,
                 CreatedAt = DateTime.Now
             };
 

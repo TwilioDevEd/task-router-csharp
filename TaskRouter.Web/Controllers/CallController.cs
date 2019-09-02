@@ -38,10 +38,9 @@ namespace TaskRouter.Web.Controllers
         {
             var selectedProduct = digits == "1" ? "ProgrammableSMS" : "ProgrammableVoice";
             var response = new VoiceResponse();
-
-            response.Enqueue(
-                selectedProduct,
-                workflowSid: Singleton.Instance.WorkflowSid);
+            var enqueue = new Enqueue(workflowSid: Singleton.Instance.WorkflowSid);
+            enqueue.Task($"{{\"selected_product\":\"{selectedProduct}\"}}");
+            response.Append(enqueue);
 
             return TwiML(response);
         }
