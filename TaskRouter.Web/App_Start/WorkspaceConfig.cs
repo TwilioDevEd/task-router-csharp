@@ -11,7 +11,7 @@ namespace TaskRouter.Web
 {
     public class WorkspaceConfig
     {
-        private readonly string _hostUrl = Config.HostUrl;
+        private readonly Config _config;
 
         private const string VoiceQueue = "VoiceQueue";
         private const string SmsQueue = "SMSQueue";
@@ -22,12 +22,15 @@ namespace TaskRouter.Web
             new WorkspaceConfig().Register();
         }
 
-        public WorkspaceConfig()
+        public WorkspaceConfig():this(new Config())
         {
-            if (Config.ENV != "test")
-            {
-                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
-            }
+        }
+
+        public WorkspaceConfig(Config config)
+        {
+            TwilioClient.Init(config.AccountSID, config.AuthToken);
+            _config = config;
+
         }
 
         public WorkspaceConfig(Type workspaceResource):this()
@@ -37,6 +40,11 @@ namespace TaskRouter.Web
         public virtual ActivityResource GetActivityByFriendlyName(string workspaceSid, string friendlyName)
         {
             return ActivityResource.Read(workspaceSid, friendlyName).First();
+        }
+
+        public virtual ActivityResource CreateActivityWithFriendlyName(string workspaceSid, string friendlyName)
+        {
+            return ActivityResource.Create(workspaceSid, friendlyName);
         }
 
         public virtual WorkspaceResource GetWorkspaceByFriendlyName(string friendlyName)
@@ -61,12 +69,13 @@ namespace TaskRouter.Web
 
         public void Register()
         {
-            var workspace = DeleteAndCreateWorkspace("Twilio Workspace", $"{_hostUrl}/callback/events");
+            var workspace = DeleteAndCreateWorkspace(
+                "Twilio Workspace", new Uri(new Uri(_config.HostUrl), "/callback/events").AbsoluteUri);
             var workspaceSid = workspace.Sid;
 
-            var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Busy");
-            var reservationActivity = GetActivityByFriendlyName(workspaceSid, "Reserved");
-            var idleActivity = GetActivityByFriendlyName(workspaceSid, "Idle");
+            var assignmentActivity = GetActivityByFriendlyName(workspaceSid, "Unavailable");
+            var idleActivity = GetActivityByFriendlyName(workspaceSid, "Available");
+            var reservationActivity = CreateActivityWithFriendlyName(workspaceSid, "Reserved");
             var offlineActivity = GetActivityByFriendlyName(workspaceSid, "Offline");
 
             var workers = CreateWorkers(workspaceSid, idleActivity);
@@ -99,7 +108,7 @@ namespace TaskRouter.Web
                 {
                     "ProgrammableSMS"
                 },
-                contact_uri = Config.AgentForProgrammableSMS
+                contact_uri = _config.AgentForProgrammableSMS
             };
 
             var bobWorker = CreateWorker(workspaceSid, "Bob", activity.Sid, Json.Encode(attributesForBob));
@@ -110,15 +119,15 @@ namespace TaskRouter.Web
                 {
                     "ProgrammableVoice"
                 },
-                contact_uri = Config.AgentForProgrammableVoice
+                contact_uri = _config.AgentForProgrammableVoice
             };
 
             var alice = CreateWorker(workspaceSid, "Alice", activity.Sid, Json.Encode(attributesForAlice));
 
             return new Dictionary<string, string>
             {
-                { Config.AgentForProgrammableSMS, bobWorker.Sid },
-                { Config.AgentForProgrammableVoice, alice.Sid },
+                { _config.AgentForProgrammableSMS, bobWorker.Sid },
+                { _config.AgentForProgrammableVoice, alice.Sid },
             };
         }
 
@@ -127,7 +136,11 @@ namespace TaskRouter.Web
             string assignmentActivitySid, string reservationActivitySid, string targetWorkers)
         {
             var queue = TaskQueueResource.Create(
-                workspaceSid, friendlyName, assignmentActivitySid, reservationActivitySid);
+                workspaceSid,
+                friendlyName: friendlyName,
+                assignmentActivitySid: assignmentActivitySid,
+                reservationActivitySid: reservationActivitySid
+            );
 
             TaskQueueResource.Update(
                 workspaceSid,
@@ -212,8 +225,8 @@ namespace TaskRouter.Web
                 workspaceSid,
                 "Tech Support",
                 Json.Encode(workflowConfiguration),
-                new Uri($"{_hostUrl}/callback/assignment"),
-                new Uri($"{_hostUrl}/callback/assignment"),
+                new Uri($"{_config.HostUrl}/callback/assignment"),
+                new Uri($"{_config.HostUrl}/callback/assignment"),
                 15);
         }
     }

@@ -13,12 +13,11 @@ namespace TaskRouter.Web.Controllers
         private const string On = "on";
         private const string Off = "off";
 
-        public MessageController()
+        public MessageController() : this(new Config()) { }
+
+        public MessageController(Config config)
         {
-            if (Config.ENV != "test")
-            {
-                TwilioClient.Init(Config.AccountSID, Config.AuthToken);
-            }
+            TwilioClient.Init(config.AccountSID, config.AuthToken);
         }
 
         public virtual WorkerResource FetchWorker(string workspaceSid, string workerSid)
@@ -36,6 +35,10 @@ namespace TaskRouter.Web.Controllers
         public ActionResult Incoming(string from, string body)
         {
             var workspaceSid = Singleton.Instance.WorkspaceSid;
+            if (!Singleton.Instance.Workers.ContainsKey(from))
+            {
+                return TwiML(new MessagingResponse().Message("Your number is not registered as an agent"));
+            }
             var workerSid = Singleton.Instance.Workers[from];
             var idleActivitySid = Singleton.Instance.IdleActivitySid;
             var offlineActivitySid = Singleton.Instance.OfflineActivitySid;

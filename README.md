@@ -23,29 +23,31 @@ This project is built using [ASP.NET MVC](http://www.asp.net/mvc) Framework.
    cd task-router-csharp
    ```
 
-1. Rename the sample configuration file and edit it to match your configuration.
+1. Copy the sample configuration file and edit it to match your configuration.
 
    ```shell
-   rename TaskRouter.Web\Local.config.example TaskRouter.Web\Local.config
+   copy TaskRouter.Web\Local.config.example TaskRouter.Web\Local.config
    ```
 
    You can find your **Account SID** and **Auth Token** in your
    [Twilio Account](https://www.twilio.com/user/account/settings).
+
+   Also part of the application initial config is the **HostUrl** it will be exposed to the wider internet.
+   We will [use ngrok](https://www.twilio.com/blog/2015/09/6-awesome-reasons-to-use-ngrok-when-testing-webhooks.html)
+   for exposing our local application. To start using ngrok on our project you'll have to
+   execute the following line in the command prompt.
+
+   ```shell
+   ngrok http 8080 -host-header="localhost:8080"
+   ```
+
+   Now you can copy the **HostUrl**. It will be something like `https://26419c64.ngrok.io/`.
 
 1. Build the solution.
 
 1. Run the application.
 
 1. Check it out at [http://localhost:8080](http://localhost:8080).
-
-1. Expose application to the wider internet. To [start using
-   ngrok](https://www.twilio.com/blog/2015/09/6-awesome-reasons-to-use-ngrok-when-testing-webhooks.html)
-   on our project you'll have to execute the following line in the command
-   prompt.
-
-   ```shell
-   ngrok http 8080 -host-header="localhost:8080"
-   ```
 
 1. Configure Twilio to call your webhooks.
 

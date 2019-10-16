@@ -8,16 +8,9 @@
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <div class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar navbar-light navbar-fixed-top bg-light">
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Task Router", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
+            @Html.ActionLink("Task Router", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
         </div>
     </div>
     <div class="container body-content">

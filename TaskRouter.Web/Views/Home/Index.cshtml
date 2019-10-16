@@ -1,39 +1,42 @@
 ﻿@model IList<TaskRouter.Web.Models.MissedCall>
 
-<div class="container full-height-container">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-        <strong>Missed calls</strong> <span class="text-muted">(Product/Number)</span></div>
-        <!-- Table -->
-        <table class="table">
-            <tbody>
-                @foreach (var missedCall in Model)
-                {
-                    <tr>
-                        <td class="col-md-3">
-                            <span class="text-muted">
-                                @missedCall.CreatedAt.ToLocalTime()
-                            </span>
-                        </td>
-                        <td class="col-md-2">
-                            @if (missedCall.Product.Equals("ProgrammableVoice"))
-                            {
-                                <span>Programmable Voice</span>
-                            }
-                            else
-                            {
-                                <span>Programmable SMS</span>
-                            }
-                        </td>
-                        <td class="col-md-7">
-                            <a href="tel:@missedCall.PhoneNumber">
-                                <i class="fa fa-phone"></i>
-                                @missedCall.PhoneNumber
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="full-height-container">
+    <div class="card">
+        <div class="card-header">
+            <strong>Missed calls</strong> <span class="text-muted">(Product/Number)</span>
+        </div>
+        <div class="card-body">
+            <!-- Table -->
+            <table class="table">
+                <tbody>
+                    @foreach (var missedCall in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-muted">
+                                    @missedCall.CreatedAt.ToLocalTime()
+                                </span>
+                            </td>
+                            <td>
+                                @if ("ProgrammableVoice".Equals(missedCall.Product))
+                                {
+                                    <span>Programmable Voice</span>
+                                }
+                                else
+                                {
+                                    <span>Programmable SMS</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="tel:@missedCall.PhoneNumber">
+                                    <i class="fa fa-phone"></i>
+                                    @missedCall.PhoneNumber
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

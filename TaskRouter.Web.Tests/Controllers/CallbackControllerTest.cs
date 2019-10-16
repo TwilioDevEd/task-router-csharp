@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
+using TaskRouter.Web.Infrastructure;
 using TaskRouter.Web.Controllers;
 using TestStack.FluentMVCTesting;
+using Moq;
 
 namespace TaskRouter.Web.Tests.Controllers
 {
@@ -9,7 +11,11 @@ namespace TaskRouter.Web.Tests.Controllers
         [Test]
         public void Assignment_RespondsWithDequeue()
         {
-            var controller = new CallbackController();
+            var mockConfig = new Mock<Config>();
+            mockConfig.SetupGet(x => x.AccountSID).Returns("ACXXXXXX...");
+            mockConfig.SetupGet(x => x.AuthToken).Returns("auth token");
+
+            var controller = new CallbackController(mockConfig.Object);
             controller.WithCallTo(c => c.Assignment())
                 .ShouldReturnJson(data =>
                  {

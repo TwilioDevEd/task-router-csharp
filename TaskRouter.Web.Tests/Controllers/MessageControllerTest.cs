@@ -15,7 +15,11 @@ namespace TaskRouter.Web.Tests.Controllers
 
         Mock<MessageController> mockMessageController()
         {
-            var controller = new Mock<MessageController>() { CallBase = true };
+            var mockConfig = new Mock<Config>();
+            mockConfig.SetupGet(x => x.AccountSID).Returns("ACXXXX...");
+            mockConfig.SetupGet(x => x.AuthToken).Returns("auth tocken");
+
+            var controller = new Mock<MessageController>(mockConfig.Object) { CallBase = true };
 
             controller
                 .Setup(c => c.FetchWorker(It.IsAny<string>(), It.IsAny<string>()))
