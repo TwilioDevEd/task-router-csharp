@@ -3,8 +3,8 @@
   <add key="AccountSID" value="Your Account SID" />
   <add key="AuthToken" value="Your Auth Token" />
   <add key="TwilioNumber" value="Your Twilio Number" />
-  <add key="HostUrl" value="The ngrok URL" />
-  <add key="VoiceMail" value="The Mail to Receive Transcriptions" />
+  <add key="HostUrl" value="The ngrok URL e.g. https://abcdef123.ngrok.io" />
+  <add key="VoiceMail" value="The Email Address to Receive Transcriptions" />
   <add key="AgentForProgrammableVoice" value="Programmable Voice Agent's Number" />
-  <add key="AgentForProgrammableSMS" value="Programmable Voice Agent's Number" />
-</appSettings
+  <add key="AgentForProgrammableSMS" value="Programmable SMS Agent's Number" />
+</appSettings>

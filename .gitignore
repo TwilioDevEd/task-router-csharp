@@ -210,3 +210,5 @@ TaskRouter.Web/Local.config
 
 # SQLite
 *.sqlite
+
+.cr

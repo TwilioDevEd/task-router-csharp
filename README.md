@@ -23,10 +23,10 @@ This project is built using [ASP.NET MVC](http://www.asp.net/mvc) Framework.
    cd task-router-csharp
    ```
 
-1. Rename the sample configuration file and edit it to match your configuration.
+1. Copy the sample configuration file and edit it to match your configuration.
 
    ```shell
-   rename TaskRouter.Web\Local.config.example TaskRouter.Web\Local.config
+   copy TaskRouter.Web\Local.config.example TaskRouter.Web\Local.config
    ```
 
    You can find your **Account SID** and **Auth Token** in your
