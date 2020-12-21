@@ -4,7 +4,7 @@
 
 # Task Router with ASP.NET MVC
 
-[![Build status](https://ci.appveyor.com/api/projects/status/73gd0opa4423fciu?svg=true)](https://ci.appveyor.com/project/TwilioDevEd/task-router-csharp)
+![](https://github.com/TwilioDevEd/task-router-csharp/workflows/NetFx/badge.svg)
 
 Use Twilio to provide your user with multiple options through phone calls, so
 they can be assisted by an agent specialized in the chosen topic. This is

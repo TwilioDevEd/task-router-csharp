@@ -207,6 +207,7 @@ FakesAssemblies/
 
 # Project
 TaskRouter.Web/Local.config
+TaskRouter.Web/Scripts/lib/
 
 # SQLite
 *.sqlite
