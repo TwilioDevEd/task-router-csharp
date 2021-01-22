@@ -9,7 +9,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskRouter.Web.Tests", "Tas
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{FFFB2806-6D7F-444A-B2E9-C62A00F9B47C}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.mergify.yml = .mergify.yml
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{1B6F4933-2763-4DAF-8DCB-39D3E1BDF3B1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{2B70207D-4136-4717-9C17-BD5C442DEC2B}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\NetFx.yml = .github\workflows\NetFx.yml
 	EndProjectSection
 EndProject
 Global
@@ -29,6 +38,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1B6F4933-2763-4DAF-8DCB-39D3E1BDF3B1} = {FFFB2806-6D7F-444A-B2E9-C62A00F9B47C}
+		{2B70207D-4136-4717-9C17-BD5C442DEC2B} = {1B6F4933-2763-4DAF-8DCB-39D3E1BDF3B1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93C28768-B3E2-409C-A83F-61D4092C66DF}
