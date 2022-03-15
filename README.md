@@ -66,7 +66,9 @@ This project is built using [ASP.NET MVC](http://www.asp.net/mvc) Framework.
    http://<sub-domain>.ngrok.io/message/incoming
    ```
 
-   ![Configure SMS](http://howtodocs.s3.amazonaws.com/twilio-number-config-all-med.gif)
+   [Learn how to configure a Twilio phone number for Programmable Voice](https://www.twilio.com/docs/voice/quickstart/csharp#configure-your-webhook-url)
+   
+   [Learn how to configure a Twilio phone number for Programmable SMS](https://support.twilio.com/hc/en-us/articles/223136047-Configure-a-Twilio-Phone-Number-to-Receive-and-Respond-to-Messages)
 
 ## How To Demo?
 
